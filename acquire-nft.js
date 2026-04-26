@@ -108,7 +108,7 @@ window.mintTier = async (tier) => {
     console.log(`[Mint Tier ${tier}] Allowance: ${Number(allowance) / 1e18} HONEY`);
 
     if (balance < ethers.parseUnits(honeyNeeded.toString(), 18)) {
-      alert(`Not enough HONEY in wallet.\n\nYou have ${(Number(balance)/1e18).toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY\nYou need ${honeyNeeded.toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY`);
+      alert(`Not enough HONEY in wallet.`);
       return;
     }
 
@@ -126,11 +126,7 @@ window.mintTier = async (tier) => {
     await loadLiveHoneyPrice();
   } catch (e) {
     console.error("Mint error:", e);
-    let msg = "Mint failed. ";
-    if (e.reason) msg += e.reason;
-    else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
-    else msg += e.message || "Unknown error";
-    document.getElementById("status").innerHTML = `<span style="color:red">❌ ${msg}</span>`;
+    alert("Mint failed: " + (e.message || "Unknown error"));
   }
 };
 
