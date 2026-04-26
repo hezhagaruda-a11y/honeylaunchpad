@@ -40,7 +40,6 @@ async function showCurrentTier() {
     const tier = Number(await nft.getUserTier(await signer.getAddress()));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>${tiers[tier]}</strong>`;
-    console.log(`Current Tier: ${tiers[tier]}`);
   } catch (e) {
     console.error("Failed to fetch current tier", e);
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>Could not load</strong>`;
