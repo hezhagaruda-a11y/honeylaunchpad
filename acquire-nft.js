@@ -1,8 +1,5 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
-// === Reown AppKit Setup ===
-const projectId = "756fef86a90a45b894fd6e7b365619bb";
-
 const HONEY = "0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2";
 const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
@@ -15,38 +12,14 @@ const NFT_ABI = ["function mintTier(uint256)", "function getUserTier(address) vi
 
 let signer, provider;
 let currentLivePrice = null;
-let web3Modal;
-
-async function initAppKit() {
-  if (web3Modal) return web3Modal;
-  for (let i = 0; i < 30; i++) {   // retry up to 3 seconds
-    if (window.AppKit && typeof window.AppKit.init === 'function') {
-      console.log("Reown AppKit script loaded successfully");
-      web3Modal = await window.AppKit.init({
-        projectId: projectId,
-        chains: [11155111],
-        metadata: {
-          name: "Honey Launchpad",
-          description: "Honey Protocol Testing Environment",
-          url: window.location.href,
-          icons: ["https://picsum.photos/id/1015/200/200"]
-        }
-      });
-      console.log("Reown AppKit initialized successfully");
-      return web3Modal;
-    }
-    await new Promise(r => setTimeout(r, 100));
-  }
-  throw new Error("Reown AppKit script did not load in time");
-}
 
 async function connectWallet() {
   try {
-    console.log("Connect Wallet clicked");
-    await initAppKit();
-    const { provider: wcProvider } = await web3Modal.connect();
-    console.log("Wallet connected via Reown");
-    provider = new ethers.BrowserProvider(wcProvider);
+    if (!window.ethereum) {
+      alert("MetaMask not detected.\n\nBest experience: Open this page inside the MetaMask mobile browser.");
+      return;
+    }
+    provider = new ethers.BrowserProvider(window.ethereum);
     signer = await provider.getSigner();
     const addr = await signer.getAddress();
     document.getElementById("wallet").innerHTML = `Connected: <strong>${addr.substring(0,8)}...${addr.substring(36)}</strong>`;
@@ -55,8 +28,8 @@ async function connectWallet() {
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
   } catch (e) {
-    console.error("Connect Wallet error:", e);
-    alert("Wallet connection failed. Please try again.");
+    console.error(e);
+    alert("Wallet connection failed.\n\nMake sure you are on Sepolia network and try again.");
   }
 }
 
@@ -135,7 +108,7 @@ window.mintTier = async (tier) => {
     console.log(`[Mint Tier ${tier}] Allowance: ${Number(allowance) / 1e18} HONEY`);
 
     if (balance < ethers.parseUnits(honeyNeeded.toString(), 18)) {
-      alert(`Not enough HONEY in wallet.`);
+      alert(`Not enough HONEY in wallet.\n\nYou have ${(Number(balance)/1e18).toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY\nYou need ${honeyNeeded.toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY`);
       return;
     }
 
@@ -153,7 +126,11 @@ window.mintTier = async (tier) => {
     await loadLiveHoneyPrice();
   } catch (e) {
     console.error("Mint error:", e);
-    alert("Mint failed: " + (e.message || "Unknown error"));
+    let msg = "Mint failed. ";
+    if (e.reason) msg += e.reason;
+    else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
+    else msg += e.message || "Unknown error";
+    document.getElementById("status").innerHTML = `<span style="color:red">❌ ${msg}</span>`;
   }
 };
 
