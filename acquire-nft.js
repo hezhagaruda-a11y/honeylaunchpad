@@ -23,7 +23,7 @@ async function initAppKit() {
     console.log("Initializing Reown AppKit...");
     web3Modal = await window.AppKit.init({
       projectId: projectId,
-      chains: [11155111], // Sepolia
+      chains: [11155111],
       metadata: {
         name: "Honey Launchpad",
         description: "Honey Protocol Testing Environment",
@@ -128,7 +128,6 @@ window.mintTier = async (tier) => {
   const nft = new ethers.Contract(NFT, NFT_ABI, signer);
 
   try {
-    // Diagnostics
     const balance = await honey.balanceOf(await signer.getAddress());
     const allowance = await honey.allowance(await signer.getAddress(), NFT);
     console.log(`[Mint Tier ${tier}] Balance: ${Number(balance) / 1e18} HONEY`);
