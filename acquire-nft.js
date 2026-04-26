@@ -19,24 +19,25 @@ let web3Modal;
 
 async function initAppKit() {
   if (web3Modal) return web3Modal;
-  try {
-    console.log("Initializing Reown AppKit...");
-    web3Modal = await window.AppKit.init({
-      projectId: projectId,
-      chains: [11155111],
-      metadata: {
-        name: "Honey Launchpad",
-        description: "Honey Protocol Testing Environment",
-        url: window.location.href,
-        icons: ["https://picsum.photos/id/1015/200/200"]
-      }
-    });
-    console.log("Reown AppKit initialized successfully");
-    return web3Modal;
-  } catch (e) {
-    console.error("Reown AppKit initialization failed", e);
-    throw e;
+  for (let i = 0; i < 20; i++) {   // retry up to 2 seconds
+    if (window.AppKit) {
+      console.log("Reown AppKit script loaded successfully");
+      web3Modal = await window.AppKit.init({
+        projectId: projectId,
+        chains: [11155111],
+        metadata: {
+          name: "Honey Launchpad",
+          description: "Honey Protocol Testing Environment",
+          url: window.location.href,
+          icons: ["https://picsum.photos/id/1015/200/200"]
+        }
+      });
+      console.log("Reown AppKit initialized successfully");
+      return web3Modal;
+    }
+    await new Promise(r => setTimeout(r, 100));
   }
+  throw new Error("Reown AppKit script did not load in time");
 }
 
 async function connectWallet() {
