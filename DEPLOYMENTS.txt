@@ -1,0 +1,56 @@
+=== AAA LAUNCHPAD v2 DEPLOYMENTS (Sepolia) ===
+Date: [21/4/2026 14.49 Helsinki]
+
+Honey (protocol token): 0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2
+
+MockUSDC (payment token): 0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93
+
+MockCCC (sale token): 0x7f4313FF0eD138030ac68cCB8D0cbcbC5F3aFAEA
+
+MockDDD (sale token): 0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F
+
+InvestorNFT: 0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA
+
+IDOFactory: 0x0388C62Ad1d354d9cb1d3533e143034B4B690102
+
+1st try:
+First IDO Pool (CCC #1 Launch) Address: 0x8E8BD4f80d3B09584625059617bE316150e17466
+
+2nd try:
+Second IDO Pool (CCC #2 Launch) Address: 0xb085D02f021Fc7c8Fa7F6c99Bb75547380A84845
+
+3rd try:
+Third IDO Pool (DDD #1 Launch) Address:
+0x7C5077D5E9A451d23eA0B5d4e70f25df71B39000
+
+4th try: 
+Fourth IDO Pool (DDD #2 Launch) Address:
+0x269aa56E463d0Ea5E8214CA7F55c6c4CA3204E00
+
+5th try:
+Re-Deployed a new IDOFactory.sol contract
+New POOL DDD  created with latest IDOFactory:
+0x1372B8dD99c74b6fbfee15Dbe11affDe6008E473
+
+6th try:
+Re-Deployed a new IDOFactory.sol contract
+New Pool DDD:
+0xFDEFCb25bbF1525C067a3033B68011EfFf0E63e2
+
+Spark Pool (Sepolia Test) Address:  0x288728f3d24F9CC63771eB463f1D144d24C493F0
+
+Notes:
+
+23.4.2026 15.53 Helsinki
+Important Note for Protocol Launch (Treasury USDC)
+Total USDC Raised in Quick Stats in Hive Control Dashboard = USDC balance of the connected wallet (the treasury address you set when launching the pool).
+
+This is expected and correct behavior.
+When users buy tokens, USDC is transferred directly to the treasury address (your wallet or any address you specify).
+The pool contract itself ends up with 0 USDC after each buy.
+This design is intentional for security and simplicity: funds go straight to the treasury without sitting in the pool.
+
+Make sure to document this clearly in the launch checklist:
+
+When launching a pool, the treasury address should be a secure multisig or dedicated treasury wallet on mainnet.
+Quick Stats "Total USDC Raised" reflects the treasury's current USDC balance.

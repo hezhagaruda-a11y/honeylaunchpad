@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hive Control • Honey Launchpad</title>
+  <script type="module" src="admin.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+    }
+    body {
+      font-family: Arial;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    input {
+      background: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 10px;
+      border-radius: 6px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+    .refresh {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🍯 Hive Control • Honey Launchpad</h1>
+    <button id="connectBtn">Connect Wallet</button>
+  </div>
+
+  <div id="walletInfo" class="card" style="display:none;">
+    <strong>Connected as:</strong> <span id="adminWallet"></span>
+  </div>
+
+  <div class="card">
+    <h2>Quick Stats</h2>
+    <div id="quickStats"></div>
+  </div>
+
+  <div class="card">
+    <h2>🚀 Quick Launch New Pool</h2>
+    <input id="saleToken" placeholder="Sale Token Address" value="0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F">
+    <input id="treasury" placeholder="Treasury Address" value="">
+    <input id="startTime" type="number" placeholder="Start Time (Unix)" value="">
+    <input id="endTime" type="number" placeholder="End Time (Unix)" value="">
+    <input id="totalSupply" type="number" placeholder="Total Supply For Sale" value="145000000000000000000000000">
+    <button id="launchBtn">Launch New IDO Pool</button>
+  </div>
+
+  <div class="card">
+    <h2>All Active Pools</h2>
+    <table id="poolsTable">
+      <thead>
+        <tr>
+          <th>Pool Name</th>
+          <th>Address</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Sold</th>
+          <th>Remaining</th>
+          <th>% Sold</th>
+          <th>USDC Raised</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>InvestorNFT Tiers & Ownership</h2>
+    <div id="nftStats"></div>
+  </div>
+
+  <div class="card">
+    <h2>My Acquisitions</h2>
+    <div id="acquisitions"></div>
+  </div>
+
+  <button class="refresh" id="refreshBtn">↻</button>
+</body>
+</html>

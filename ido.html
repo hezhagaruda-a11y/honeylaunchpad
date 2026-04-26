@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Honey Launchpad • IDO</title>
+  <script type="module" src="ido.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card-bg: white;
+      --text: #111;
+      --accent: #4caf50;
+    }
+    [data-theme="dark"] {
+      --bg: #0f0f0f;
+      --card-bg: #1a1a1a;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+    }
+    body {
+      font-family: Arial;
+      background: var(--bg);
+      background-image:
+        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
+      background-size: 58px 33px;
+      color: var(--text);
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      transition: background 0.3s;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      border: 1px solid #ddd;
+    }
+    [data-theme="dark"] .card {
+      border: 1px solid #333;
+    }
+    button {
+      padding: 14px 20px;
+      border: none;
+      background: #111;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      min-height: 48px;
+    }
+    [data-theme="dark"] button {
+      background: white;
+      color: #111;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+    .progress-container { width: 100%; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+    .progress-bar { height: 20px; background: #4caf50; width: 0%; }
+    #countdownContainer {
+      background: #fff3cd;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      margin: 15px 0;
+    }
+    [data-theme="dark"] #countdownContainer {
+      background: #3a2a00;
+      color: #f0f0f0;
+    }
+    .address {
+      font-size: 0.9em;
+      word-break: break-all;
+      color: #666;
+      margin-top: 4px;
+    }
+    .theme-toggle {
+      padding: 10px 12px;
+      font-size: 22px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+  </div>
+  <h2 id="pageTitle">🍯 Honey Launchpad • IDO</h2>
+  <div class="card">
+    <b>Pool Address</b>
+    <p id="poolAddress" class="address"></p>
+    <button id="connect">Connect Wallet</button>
+    <p id="wallet"></p>
+    <b>Investor Tier</b><p id="tier"></p>
+    <b>Wallet Balance (USDC)</b><p id="balance"></p>
+  </div>
+  <div id="countdownContainer" style="display:none;"></div>
+  <div class="card">
+    <b>Your Allocation Limit</b><p id="allocation"></p>
+  </div>
+  <div class="card">
+    <b>📊 Pool Status</b>
+    <p>Sold: <span id="sold"></span></p>
+    <p>Remaining: <span id="remaining"></span></p>
+    <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
+    <p id="percent"></p>
+  </div>
+  <div class="card">
+    <b id="buySectionTitle">Buy Tokens</b>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <input id="usdcInput" placeholder="Enter USDC amount" type="text" style="flex:1;" />
+      <button id="minBtn" style="min-width:80px;">MIN</button>
+      <button id="maxBtn" style="min-width:80px;">MAX</button>
+    </div>
+    <p id="quote"></p>
+    <button id="buyBtn">Buy Tokens</button>
+  </div>
+</body>
+</html>
