@@ -19,8 +19,8 @@ let web3Modal;
 
 async function initAppKit() {
   if (web3Modal) return web3Modal;
-  for (let i = 0; i < 20; i++) {   // retry up to 2 seconds
-    if (window.AppKit) {
+  for (let i = 0; i < 30; i++) {   // retry up to 3 seconds
+    if (window.AppKit && typeof window.AppKit.init === 'function') {
       console.log("Reown AppKit script loaded successfully");
       web3Modal = await window.AppKit.init({
         projectId: projectId,
@@ -51,11 +51,24 @@ async function connectWallet() {
     const addr = await signer.getAddress();
     document.getElementById("wallet").innerHTML = `Connected: <strong>${addr.substring(0,8)}...${addr.substring(36)}</strong>`;
 
+    await showCurrentTier();
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
   } catch (e) {
     console.error("Connect Wallet error:", e);
     alert("Wallet connection failed. Please try again.");
+  }
+}
+
+async function showCurrentTier() {
+  if (!signer) return;
+  try {
+    const nft = new ethers.Contract(NFT, NFT_ABI, signer);
+    const tier = Number(await nft.getUserTier(await signer.getAddress()));
+    const tiers = ["None", "Bronze", "Silver", "Gold"];
+    document.getElementById("status").innerHTML = `<span style="color:#4caf50">Current Tier: <strong>${tiers[tier]}</strong></span>`;
+  } catch (e) {
+    console.error("Failed to fetch current tier", e);
   }
 }
 
@@ -135,6 +148,7 @@ window.mintTier = async (tier) => {
     await mintTx.wait();
 
     document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Successfully minted Tier ${tier}!</span>`;
+    await showCurrentTier();
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
   } catch (e) {
