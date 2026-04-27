@@ -2,7 +2,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 const FACTORY_ADDRESS = '0x0388C62Ad1d354d9cb1d3533e143034B4B690102';
 const SPARK_DEX_POOL = '0x288728f3d24F9CC63771eB463f1D144d24C493F0';
-const RPC_URL = 'https://rpc.sepolia.org';
+const RPC_URL = 'https://sepolia.drpc.org';   // Reliable CORS-friendly RPC
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -57,19 +57,18 @@ factory.on("PoolCreated", (poolAddress, saleToken, treasury, startTime, endTime,
 });
 
 window.loadTraffic = async function loadTraffic() {
-  // Load existing IDO pools
   try {
-    const pools = await factory.getAllPools();
+    // Load existing IDO pools
+    const pools = await factory.getAllPools().catch(() => []);
     pools.forEach(pool => {
-      const timeStr = "Existing";
       recentIdoEvents.unshift({
-        time: timeStr,
+        time: "Existing",
         pool: pool,
         event: "Pool Available"
       });
     });
   } catch (e) {
-    console.error("Could not load existing pools", e);
+    console.warn("Could not load existing pools", e);
   }
 
   renderTraffic();
@@ -93,6 +92,10 @@ function renderTraffic() {
     tr.innerHTML = `<td>${event.time}</td><td><code>${event.pool.substring(0,8)}...</code></td><td>${event.event}</td>`;
     idoBody.appendChild(tr);
   });
+
+  if (recentIdoEvents.length === 0) {
+    idoBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:#888;">No IDO activity yet. First pool coming soon...</td></tr>`;
+  }
 }
 
 // Initial load
