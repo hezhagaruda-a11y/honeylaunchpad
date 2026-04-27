@@ -40,6 +40,7 @@ async function showCurrentTier() {
     const tier = Number(await nft.getUserTier(await signer.getAddress()));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>${tiers[tier]}</strong>`;
+    console.log(`Current Tier: ${tiers[tier]}`);
   } catch (e) {
     console.error("Failed to fetch current tier", e);
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>Could not load</strong>`;
@@ -109,7 +110,7 @@ window.mintTier = async (tier) => {
     console.log(`[Mint Tier ${tier}] Allowance: ${Number(allowance) / 1e18} HONEY`);
 
     if (balance < ethers.parseUnits(honeyNeeded.toString(), 18)) {
-      alert(`Not enough HONEY in wallet.`);
+      alert(`Not enough HONEY in wallet.\n\nYou have ${(Number(balance)/1e18).toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY\nYou need ${honeyNeeded.toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY`);
       return;
     }
 
