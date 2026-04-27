@@ -8,13 +8,6 @@ const NFT_ABI = ["function balanceOf(address) view returns (uint256)", "function
 
 let provider;
 
-// Copy to clipboard helper
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Wallet address copied!");
-  });
-}
-
 window.loadLeaderboard = async function loadLeaderboard() {
   const tbody = document.getElementById("leaderboardBody");
   tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px;">Loading leaderboard...</td></tr>`;
@@ -25,9 +18,8 @@ window.loadLeaderboard = async function loadLeaderboard() {
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
 
-    // Demo data for multiple holders (expand as more players join)
     const demoWallets = [
-      "0xFD242c04fA7De83fc5BdBa5033122646373B5ce2", // Your test wallet
+      "0xFD242c04fA7De83fc5BdBa5033122646373B5ce2",
       "0x7ee4fe6dc352f830d7f57e2e99cab462c05d5882",
       "0xaFbCFA5A5445f4E6711CB9Fa86991ea4485920b1",
       "0x1234567890abcdef1234567890abcdef12345678"
@@ -48,7 +40,6 @@ window.loadLeaderboard = async function loadLeaderboard() {
       });
     }
 
-    // Sort by HONEY balance descending
     rows.sort((a, b) => b.honey - a.honey);
 
     tbody.innerHTML = "";
@@ -60,16 +51,17 @@ window.loadLeaderboard = async function loadLeaderboard() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td class="rank">${index + 1}</td>
-        <td>
-          <span class="wallet">${row.wallet.substring(0,8)}...${row.wallet.substring(36)}</span>
-          <button onclick="copyToClipboard('${row.wallet}')" class="copy-btn">📋</button>
-        </td>
+        <td><span class="wallet">${row.wallet.substring(0,8)}...${row.wallet.substring(36)}</span></td>
         <td><strong>${row.honey.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
         <td class="tier ${tierClass}">${tierName}</td>
         <td>${row.nftCount}</td>
       `;
       tbody.appendChild(tr);
     });
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">No data yet. Be one of the first players!</td></tr>`;
+    }
 
   } catch (e) {
     console.error("Leaderboard error:", e);
