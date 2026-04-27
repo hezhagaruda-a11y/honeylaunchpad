@@ -8,7 +8,12 @@ const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function approve(address,uint256)", "function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)"];
-const NFT_ABI = ["function mintTier(uint256)", "function getUserTier(address) view returns (uint256)"];
+const NFT_ABI = [
+  "function mintBronze()",
+  "function mintSilver()",
+  "function mintGold()",
+  "function getUserTier(address) view returns (uint256)"
+];
 
 let signer, provider;
 let currentLivePrice = null;
@@ -40,7 +45,7 @@ async function showCurrentTier() {
     const tier = Number(await nft.getUserTier(await signer.getAddress()));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>${tiers[tier]}</strong>`;
-    console.log(`Current Tier fetched: ${tiers[tier]}`);
+    console.log(`Current Tier: ${tiers[tier]}`);
   } catch (e) {
     console.error("Failed to fetch current tier", e);
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>Could not load</strong>`;
@@ -119,7 +124,12 @@ window.mintTier = async (tier) => {
       await approveTx.wait();
     }
 
-    const mintTx = await nft.mintTier(tier);
+    // Call the correct function that actually exists in the contract
+    let mintTx;
+    if (tier === 1) mintTx = await nft.mintBronze();
+    else if (tier === 2) mintTx = await nft.mintSilver();
+    else if (tier === 3) mintTx = await nft.mintGold();
+
     await mintTx.wait();
 
     document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Successfully minted Tier ${tier}!</span>`;
