@@ -21,8 +21,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
     const demoWallets = [
       "0xFD242c04fA7De83fc5BdBa5033122646373B5ce2",
       "0x7ee4fe6dc352f830d7f57e2e99cab462c05d5882",
-      "0xaFbCFA5A5445f4E6711CB9Fa86991ea4485920b1",
-      "0x1234567890abcdef1234567890abcdef12345678"
+      "0xaFbCFA5A5445f4E6711CB9Fa86991ea4485920b1"
     ];
 
     const rows = [];
@@ -32,12 +31,14 @@ window.loadLeaderboard = async function loadLeaderboard() {
       const nftBalance = await nft.balanceOf(wallet).catch(() => 0);
       const tier = nftBalance > 0 ? Number(await nft.getUserTier(wallet).catch(() => 0)) : 0;
 
-      rows.push({
-        wallet,
-        honey: Number(honeyBalance) / 1e18,
-        tier: tier,
-        nftCount: Number(nftBalance)
-      });
+      if (honeyBalance > 0) {   // Only show wallets with actual HONEY
+        rows.push({
+          wallet,
+          honey: Number(honeyBalance) / 1e18,
+          tier: tier,
+          nftCount: Number(nftBalance)
+        });
+      }
     }
 
     rows.sort((a, b) => b.honey - a.honey);
