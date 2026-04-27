@@ -40,7 +40,7 @@ async function showCurrentTier() {
     const tier = Number(await nft.getUserTier(await signer.getAddress()));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>${tiers[tier]}</strong>`;
-    console.log(`Current Tier: ${tiers[tier]}`);
+    console.log(`Current Tier fetched: ${tiers[tier]}`);
   } catch (e) {
     console.error("Failed to fetch current tier", e);
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>Could not load</strong>`;
@@ -127,7 +127,7 @@ window.mintTier = async (tier) => {
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
   } catch (e) {
-    console.error("Mint error:", e);
+    console.error("Mint error details:", e);
     let msg = "Mint failed. ";
     if (e.reason) msg += e.reason;
     else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
