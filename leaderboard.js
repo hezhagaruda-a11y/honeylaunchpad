@@ -6,64 +6,51 @@ const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
 const NFT_ABI = [
   "function balanceOf(address) view returns (uint256)",
-  "function tokenOfOwnerByIndex(address,uint256) view returns (uint256)",
   "function getUserTier(address) view returns (uint256)"
 ];
 
 let provider;
 
-async function loadLeaderboard() {
+// Make this function global so the button can call it
+window.loadLeaderboard = async function loadLeaderboard() {
   const tbody = document.getElementById("leaderboardBody");
   tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px;">Loading leaderboard...</td></tr>`;
 
   try {
-    if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
+    if (!provider) provider = new ethers.BrowserProvider(window.ethereum || window.ethereum);
+
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
 
-    // For simplicity in this phase, we show known wallets or top holders
-    // In a full version we would index all holders, but for now we show a clean leaderboard
-    // You can expand this later with a backend or subgraph
-
+    // For now, show the currently connected wallet (if any) + a few placeholders
+    // In the future we can expand this to show top holders
     const rows = [];
 
-    // Example known wallets - replace or expand as more players join
-    const knownWallets = [
-      // Add real wallets that have minted or bought HONEY here
-      // For now it will show current connected wallet + some placeholders
-    ];
+    // Try to get current connected wallet
+    let currentWallet = null;
+    try {
+      const signer = await provider.getSigner();
+      currentWallet = await signer.getAddress();
+    } catch (e) {}
 
-    // Add current connected wallet if available
-    if (window.ethereum) {
+    if (currentWallet) {
       try {
-        const signer = await provider.getSigner();
-        const addr = await signer.getAddress();
-        knownWallets.unshift(addr);
-      } catch(e) {}
-    }
+        const honeyBalance = await honey.balanceOf(currentWallet);
+        const nftBalance = await nft.balanceOf(currentWallet);
+        const tier = Number(await nft.getUserTier(currentWallet));
 
-    for (const wallet of knownWallets) {
-      const honeyBalance = await honey.balanceOf(wallet);
-      const nftBalance = await nft.balanceOf(wallet);
-      let highestTier = 0;
-
-      if (nftBalance > 0) {
-        for (let i = 0; i < nftBalance; i++) {
-          const tokenId = await nft.tokenOfOwnerByIndex(wallet, i);
-          const tier = Number(await nft.getUserTier(wallet)); // getUserTier already returns highest
-          if (tier > highestTier) highestTier = tier;
-        }
+        rows.push({
+          wallet: currentWallet,
+          honey: Number(honeyBalance) / 1e18,
+          tier: tier,
+          nftCount: Number(nftBalance)
+        });
+      } catch (e) {
+        console.error("Error fetching current wallet data", e);
       }
-
-      rows.push({
-        wallet,
-        honey: Number(honeyBalance) / 1e18,
-        tier: highestTier,
-        nftCount: Number(nftBalance)
-      });
     }
 
-    // Sort by HONEY balance descending
+    // Sort by HONEY balance
     rows.sort((a, b) => b.honey - a.honey);
 
     tbody.innerHTML = "";
@@ -84,13 +71,16 @@ async function loadLeaderboard() {
     });
 
     if (rows.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">No data yet. Be one of the first players!</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#888;">No data yet. Be one of the first players to appear here!</td></tr>`;
     }
 
   } catch (e) {
-    console.error(e);
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error loading leaderboard. Please try again.</td></tr>`;
+    console.error("Leaderboard error:", e);
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:40px;">Error loading leaderboard.<br>Please try again later.</td></tr>`;
   }
-}
+};
 
-document.addEventListener('DOMContentLoaded', loadLeaderboard);
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+  window.loadLeaderboard();
+});
