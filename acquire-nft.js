@@ -5,15 +5,11 @@ const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
 
 const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
+const TIER_DISCOUNT = { 1: 8, 2: 15, 3: 22 };   // Bronze 8%, Silver 15%, Gold 22%
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function approve(address,uint256)", "function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)"];
-const NFT_ABI = [
-  "function mintBronze()",
-  "function mintSilver()",
-  "function mintGold()",
-  "function getUserTier(address) view returns (uint256)"
-];
+const NFT_ABI = ["function mintBronze()", "function mintSilver()", "function mintGold()", "function getUserTier(address) view returns (uint256)"];
 
 let signer, provider;
 let currentLivePrice = null;
@@ -45,10 +41,8 @@ async function showCurrentTier() {
     const tier = Number(await nft.getUserTier(await signer.getAddress()));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     document.getElementById("currentTier").innerHTML = `Current Tier: <strong>${tiers[tier]}</strong>`;
-    console.log(`Current Tier: ${tiers[tier]}`);
   } catch (e) {
     console.error("Failed to fetch current tier", e);
-    document.getElementById("currentTier").innerHTML = `Current Tier: <strong>Could not load</strong>`;
   }
 }
 
@@ -111,11 +105,9 @@ window.mintTier = async (tier) => {
   try {
     const balance = await honey.balanceOf(await signer.getAddress());
     const allowance = await honey.allowance(await signer.getAddress(), NFT);
-    console.log(`[Mint Tier ${tier}] Balance: ${Number(balance) / 1e18} HONEY`);
-    console.log(`[Mint Tier ${tier}] Allowance: ${Number(allowance) / 1e18} HONEY`);
 
     if (balance < ethers.parseUnits(honeyNeeded.toString(), 18)) {
-      alert(`Not enough HONEY in wallet.\n\nYou have ${(Number(balance)/1e18).toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY\nYou need ${honeyNeeded.toLocaleString('en-US', {minimumFractionDigits: 2})} HONEY`);
+      alert(`Not enough HONEY in wallet.`);
       return;
     }
 
@@ -124,7 +116,6 @@ window.mintTier = async (tier) => {
       await approveTx.wait();
     }
 
-    // Call the correct function that actually exists in the contract
     let mintTx;
     if (tier === 1) mintTx = await nft.mintBronze();
     else if (tier === 2) mintTx = await nft.mintSilver();
@@ -132,12 +123,24 @@ window.mintTier = async (tier) => {
 
     await mintTx.wait();
 
-    document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Successfully minted Tier ${tier}!</span>`;
+    // === Exciting, tier-specific success message ===
+    const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
+    const discount = TIER_DISCOUNT[tier];
+
+    document.getElementById("status").innerHTML = `
+      <span style="color:#4caf50; font-size:1.15em; line-height:1.6;">
+        🎉 Congratulations!<br><br>
+        You have successfully minted a <strong>${tierName} Investor NFT</strong>!<br><br>
+        This NFT gives you <strong>${discount}% discount</strong> on <strong>ALL future IDO launches</strong> across the Honey protocol.<br><br>
+        You are now part of the early circle with priority access and generational wealth building potential.
+      </span>
+    `;
+
     await showCurrentTier();
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
   } catch (e) {
-    console.error("Mint error details:", e);
+    console.error("Mint error:", e);
     let msg = "Mint failed. ";
     if (e.reason) msg += e.reason;
     else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
