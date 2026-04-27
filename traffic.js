@@ -1,6 +1,6 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
-// Demo data — will be replaced with real events later
+// Demo data for now (will be replaced with real events later)
 const demoDexSwaps = [
   { time: "2m ago", action: "Buy HONEY", amount: "1,245 HONEY" },
   { time: "5m ago", action: "Sell HONEY", amount: "8,420 HONEY" },

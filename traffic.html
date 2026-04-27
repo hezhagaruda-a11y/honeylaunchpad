@@ -43,22 +43,6 @@
     [data-theme="dark"] .card {
       border: 1px solid #333;
     }
-    .theme-toggle {
-      padding: 10px 12px;
-      font-size: 22px;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #111;
-      color: white;
-    }
-    [data-theme="dark"] .theme-toggle {
-      background: white;
-      color: #111;
-    }
     .section-title {
       font-size: 1.1em;
       margin-bottom: 12px;
@@ -77,6 +61,22 @@
     [data-theme="dark"] th, [data-theme="dark"] td {
       border-bottom: 1px solid #444;
     }
+    .theme-toggle {
+      padding: 10px 12px;
+      font-size: 22px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+    }
+    [data-theme="dark"] .theme-toggle {
+      background: white;
+      color: #111;
+    }
   </style>
 </head>
 <body>
@@ -88,40 +88,37 @@
   <h1>📡 Protocol Traffic</h1>
   <p style="color:#666; margin-bottom:20px;">Live DEX swaps &amp; IDO activity • Open to everyone</p>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto;">
-    
-    <!-- Left: Spark DEX Activity -->
-    <div class="card">
-      <div class="section-title">🔥 Spark DEX • Recent Swaps</div>
-      <table id="dexTable">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Action</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="dexBody"></tbody>
-      </table>
-    </div>
-
-    <!-- Right: IDO Activity -->
-    <div class="card">
-      <div class="section-title">🚀 IDO Launches &amp; Purchases</div>
-      <table id="idoTable">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Pool</th>
-            <th>Event</th>
-          </tr>
-        </thead>
-        <tbody id="idoBody"></tbody>
-      </table>
-    </div>
+  <!-- Spark DEX Section -->
+  <div class="card">
+    <div class="section-title">🔥 Spark DEX • Recent Swaps</div>
+    <table id="dexTable">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Action</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody id="dexBody"></tbody>
+    </table>
   </div>
 
-  <button onclick="loadTraffic()" style="width:100%; padding:14px; margin-top:20px;">🔄 Refresh Traffic</button>
+  <!-- IDO Section -->
+  <div class="card">
+    <div class="section-title">🚀 IDO Launches &amp; Purchases</div>
+    <table id="idoTable">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Pool</th>
+          <th>Event</th>
+        </tr>
+      </thead>
+      <tbody id="idoBody"></tbody>
+    </table>
+  </div>
+
+  <button onclick="loadTraffic()" style="width:100%; padding:14px; margin-top:10px;">🔄 Refresh Traffic</button>
 
   <script>
     document.getElementById("themeToggle").onclick = () => {
