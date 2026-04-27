@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Honey Launchpad • Protocol Traffic</title>
+  <script type="module" src="traffic.js"></script>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --card-bg: white;
+      --text: #111;
+      --accent: #4caf50;
+    }
+    [data-theme="dark"] {
+      --bg: #0f0f0f;
+      --card-bg: #1a1a1a;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+    }
+    body { 
+      font-family: Arial; 
+      background: var(--bg);
+      background-image: 
+        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
+      background-size: 58px 33px;
+      color: var(--text); 
+      padding: 20px; 
+      margin: 0;
+      min-height: 100vh;
+      transition: background 0.3s;
+    }
+    .card { 
+      background: var(--card-bg); 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+    }
+    [data-theme="dark"] .card {
+      border: 1px solid #333;
+    }
+    .theme-toggle {
+      padding: 10px 12px;
+      font-size: 22px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+    }
+    [data-theme="dark"] .theme-toggle {
+      background: white;
+      color: #111;
+    }
+    .section-title {
+      font-size: 1.1em;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 14.5px;
+    }
+    [data-theme="dark"] th, [data-theme="dark"] td {
+      border-bottom: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <!-- Dark Mode Toggle -->
+  <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+  </div>
+
+  <h1>📡 Protocol Traffic</h1>
+  <p style="color:#666; margin-bottom:20px;">Live DEX swaps &amp; IDO activity • Open to everyone</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto;">
+    
+    <!-- Left: Spark DEX Activity -->
+    <div class="card">
+      <div class="section-title">🔥 Spark DEX • Recent Swaps</div>
+      <table id="dexTable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="dexBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Right: IDO Activity -->
+    <div class="card">
+      <div class="section-title">🚀 IDO Launches &amp; Purchases</div>
+      <table id="idoTable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Pool</th>
+            <th>Event</th>
+          </tr>
+        </thead>
+        <tbody id="idoBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <button onclick="loadTraffic()" style="width:100%; padding:14px; margin-top:20px;">🔄 Refresh Traffic</button>
+
+  <script>
+    document.getElementById("themeToggle").onclick = () => {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const newTheme = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    };
+  </script>
+</body>
+</html>
