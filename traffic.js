@@ -2,7 +2,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 const FACTORY_ADDRESS = '0x0388C62Ad1d354d9cb1d3533e143034B4B690102';
 const SPARK_DEX_POOL = '0x288728f3d24F9CC63771eB463f1D144d24C493F0';
-const RPC_URL = 'https://sepolia.drpc.org';   // More reliable RPC
+const RPC_URL = 'https://rpc.sepolia.org';   // More stable public RPC
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
