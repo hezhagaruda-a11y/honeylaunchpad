@@ -35,10 +35,10 @@
     }
     .card { 
       background: var(--card-bg); 
-      padding: 20px; 
-      margin-bottom: 20px; 
-      border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+      padding: 24px; 
+      margin-bottom: 24px; 
+      border-radius: 16px; 
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08); 
       overflow-x: auto;
     }
     [data-theme="dark"] .card {
@@ -46,11 +46,11 @@
     }
     table {
       width: 100%;
-      min-width: 520px;
+      min-width: 560px;
       border-collapse: collapse;
     }
     th, td {
-      padding: 14px 10px;
+      padding: 16px 12px;
       text-align: left;
       border-bottom: 1px solid #ddd;
       font-size: 15.5px;
@@ -61,12 +61,21 @@
     }
     th {
       font-weight: 600;
-      color: var(--text);
+      color: #555;
+      font-size: 14px;
     }
     .rank {
       font-weight: bold;
-      width: 40px;
+      width: 44px;
       text-align: center;
+      font-size: 17px;
+    }
+    .current-user {
+      background: #fff7e6;
+      font-weight: 600;
+    }
+    [data-theme="dark"] .current-user {
+      background: #332200;
     }
     .wallet {
       font-family: monospace;
@@ -103,7 +112,7 @@
   </div>
 
   <h1>🏆 Honey Launchpad Leaderboard</h1>
-  <p style="color: var(--text); opacity: 0.85; margin-bottom:20px; font-weight: 500;">
+  <p style="color: var(--text); opacity: 0.85; margin-bottom:24px; font-weight: 500;">
     Top HONEY holders by balance • Investor Tier shown
   </p>
 
@@ -124,9 +133,9 @@
     </table>
   </div>
 
-  <button onclick="loadLeaderboard()" style="width:100%; padding:14px;">🔄 Refresh Leaderboard</button>
+  <button onclick="loadLeaderboard()" style="width:100%; padding:16px; font-size:17px;">🔄 Refresh Leaderboard</button>
 
-  <p style="text-align:center; margin-top:30px; color: var(--text); opacity: 0.7; font-size:0.9em;">
+  <p style="text-align:center; margin-top:30px; color: var(--text); opacity: 0.7; font-size:0.95em;">
     Only wallets that have interacted with the protocol are shown.<br>
     The game is just beginning.
   </p>
