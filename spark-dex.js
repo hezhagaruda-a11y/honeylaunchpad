@@ -62,7 +62,7 @@ async function loadLiveHoneyPrice() {
   }
 }
 
-// Real-time calculation on input change
+// Real-time calculation
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('swapAmount');
   const receiveDisplay = document.getElementById('youWillReceive');
@@ -76,7 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.performSwap = async () => {
-  alert("Swap functionality coming in next iteration.");
+  const input = document.getElementById('swapAmount');
+  const usdcAmount = parseFloat(input.value) || 0;
+  if (usdcAmount <= 0) {
+    alert("Please enter a valid amount");
+    return;
+  }
+  if (!currentLivePrice) {
+    alert("Price not loaded yet");
+    return;
+  }
+  const honeyAmount = usdcAmount / currentLivePrice;
+  document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Simulated swap successful!<br>You received <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
 };
 
 document.getElementById("themeToggle").onclick = () => {
