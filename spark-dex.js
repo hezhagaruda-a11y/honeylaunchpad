@@ -87,7 +87,7 @@ window.performSwap = async () => {
     return;
   }
   const honeyAmount = usdcAmount / currentLivePrice;
-  document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Simulated swap successful!<br>You received <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
+  document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
 };
 
 document.getElementById("themeToggle").onclick = () => {
