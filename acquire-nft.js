@@ -5,7 +5,6 @@ const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
 
 const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
-const TIER_DISCOUNT = { 1: 8, 2: 15, 3: 22 };
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function approve(address,uint256)", "function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)"];
@@ -62,7 +61,7 @@ async function updateHoneyBalance() {
 async function loadLiveHoneyPrice() {
   try {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
-    const pool = new ethers.Contract(SPARK_DEX_POOL, POOL_ABI, provider);
+    const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
     const [reserve0, reserve1] = await pool.getReserves();
 
     const usdcReserve = Number(reserve0) / 1e6;
@@ -83,6 +82,11 @@ async function loadLiveHoneyPrice() {
     });
   } catch (e) {
     console.error("Live price fetch failed", e);
+    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00400000 USDC</strong> (Simulated Spark DEX Pool)`;
+    // Fallback values
+    document.getElementById("bronzeHONEY").innerHTML = `Requires <strong>75,000.00 HONEY</strong> (300 USDC equivalent)`;
+    document.getElementById("silverHONEY").innerHTML = `Requires <strong>250,000.00 HONEY</strong> (1000 USDC equivalent)`;
+    document.getElementById("goldHONEY").innerHTML = `Requires <strong>1,250,000.00 HONEY</strong> (5000 USDC equivalent)`;
   }
 }
 
@@ -123,22 +127,7 @@ window.mintTier = async (tier) => {
 
     await mintTx.wait();
 
-    // Beautiful popup success message
-    const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
-    const discount = TIER_DISCOUNT[tier];
-
-    const successText = `
-      🎉 Congratulations!<br><br>
-      You have successfully minted a <strong>${tierName} Investor NFT</strong>!<br><br>
-      This NFT gives you <strong>${discount}% discount</strong> on <strong>ALL future IDO launches</strong> across the Honey protocol.<br><br>
-      You are now part of the early circle with priority access and generational wealth building potential.<br><br>
-      <strong>Join the exclusive LaunchInvestorBot on Telegram</strong> (Investor NFT gated) for real-time alerts, scouting reports and community.<br>
-      Just search for <strong>@LaunchInvestorBot</strong> and start the bot.
-    `;
-
-    document.getElementById("successText").innerHTML = successText;
-    document.getElementById("successModal").style.display = "flex";
-
+    document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Successfully minted Tier ${tier}!</span>`;
     await showCurrentTier();
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
