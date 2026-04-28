@@ -22,7 +22,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
 
-    // Demo wallets to show multiple HONEY holders
+    // Expanded demo wallets to show multiple HONEY holders
     const demoWallets = [
       "0x7ee4fe6dc352f830d7f57e2e99cab462c05d5882",
       "0xaFbCFA5A5445f4E6711CB9Fa86991ea4485920b1",
@@ -45,12 +45,14 @@ window.loadLeaderboard = async function loadLeaderboard() {
       const tier = nftBalance > 0 ? Number(await nft.getUserTier(wallet).catch(() => 0)) : 0;
 
       let nftIdDisplay = "—";
+
       if (nftBalance === 1) {
         try {
           const tokenId = await nft.tokenOfOwnerByIndex(wallet, 0);
           nftIdDisplay = tokenId.toString();
         } catch (e) {
-          nftIdDisplay = "Error";
+          console.warn("tokenOfOwnerByIndex failed for", wallet, e);
+          nftIdDisplay = "—";   // fallback
         }
       } else if (nftBalance > 1) {
         nftIdDisplay = "Multiple";
