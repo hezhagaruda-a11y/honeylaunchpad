@@ -22,6 +22,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
 
+    // Demo wallets to show multiple HONEY holders
     const demoWallets = [
       "0x7ee4fe6dc352f830d7f57e2e99cab462c05d5882",
       "0xaFbCFA5A5445f4E6711CB9Fa86991ea4485920b1",
@@ -32,6 +33,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
 
     const rows = [];
     let currentWallet = null;
+
     try {
       const signer = await provider.getSigner();
       currentWallet = await signer.getAddress();
@@ -78,7 +80,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
       tr.innerHTML = `
         <td class="rank">${index + 1}</td>
         <td><span class="wallet">${row.wallet.substring(0,8)}...${row.wallet.substring(36)}</span></td>
-        <td><strong>${row.honey.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+        <td><strong>${row.honey.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
         <td class="tier ${tierClass}">${tierName}</td>
         <td>${row.nftCount}</td>
         <td>${row.nftId}</td>
