@@ -51,7 +51,7 @@ async function updateHoneyBalance() {
     const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
     const balance = await honey.balanceOf(await signer.getAddress());
     document.getElementById("honeyBalance").innerHTML = `
-      HONEY Balance: <strong>${(Number(balance) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 4})}</strong>
+      HONEY Balance: <strong>${(Number(balance) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
     `;
   } catch (e) {
     console.error("Balance fetch failed", e);
@@ -75,7 +75,7 @@ async function loadLiveHoneyPrice() {
     Object.keys(TIER_USD).forEach(tier => {
       const honeyNeeded = TIER_USD[tier] / currentLivePrice;
       const id = tier === "1" ? "bronzeHONEY" : tier === "2" ? "silverHONEY" : "goldHONEY";
-      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById(id).innerHTML = `
         Requires <strong>${formatted} HONEY</strong> (${TIER_USD[tier]} USDC equivalent)
       `;
@@ -83,7 +83,6 @@ async function loadLiveHoneyPrice() {
   } catch (e) {
     console.error("Live price fetch failed", e);
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00400000 USDC</strong> (Simulated Spark DEX Pool)`;
-    // Fallback values
     document.getElementById("bronzeHONEY").innerHTML = `Requires <strong>75,000.00 HONEY</strong> (300 USDC equivalent)`;
     document.getElementById("silverHONEY").innerHTML = `Requires <strong>250,000.00 HONEY</strong> (1000 USDC equivalent)`;
     document.getElementById("goldHONEY").innerHTML = `Requires <strong>1,250,000.00 HONEY</strong> (5000 USDC equivalent)`;

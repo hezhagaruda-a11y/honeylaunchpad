@@ -18,36 +18,55 @@ window.loadLeaderboard = async function loadLeaderboard() {
 
   try {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const wallet = await signer.getAddress();
 
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
 
-    const honeyBalance = Number(await honey.balanceOf(wallet)) / 1e18;
-    const nftBalance = Number(await nft.balanceOf(wallet));
-    const tier = nftBalance > 0 ? Number(await nft.getUserTier(wallet)) : 0;
+    const demoWallets = [
+      "0x7ee4fe6dc352f830d7f57e2e99cab462c05d5882",
+      "0xaFbCFA5A5445f4E6711CB9Fa86991ea4485920b1",
+      "0xFD242c04fA7De83fc5BdBa5033122646373B5ce2"
+    ];
 
-    let nftIdDisplay = "—";
-    if (nftBalance === 1) {
-      const tokenId = await nft.tokenOfOwnerByIndex(wallet, 0);
-      nftIdDisplay = tokenId.toString();
-    } else if (nftBalance > 1) {
-      nftIdDisplay = "Multiple";
+    const rows = [];
+    let currentWallet = null;
+    try {
+      const signer = await provider.getSigner();
+      currentWallet = await signer.getAddress();
+    } catch (e) {}
+
+    for (const wallet of demoWallets) {
+      const honeyBalance = await honey.balanceOf(wallet).catch(() => 0);
+      const nftBalance = await nft.balanceOf(wallet).catch(() => 0);
+      const tier = nftBalance > 0 ? Number(await nft.getUserTier(wallet).catch(() => 0)) : 0;
+
+      let nftIdDisplay = "—";
+      if (nftBalance === 1) {
+        try {
+          const tokenId = await nft.tokenOfOwnerByIndex(wallet, 0);
+          nftIdDisplay = tokenId.toString();
+        } catch (e) {
+          nftIdDisplay = "Error";
+        }
+      } else if (nftBalance > 1) {
+        nftIdDisplay = "Multiple";
+      }
+
+      rows.push({
+        wallet,
+        honey: Number(honeyBalance) / 1e18,
+        tier: tier,
+        nftCount: Number(nftBalance),
+        nftId: nftIdDisplay,
+        isCurrent: wallet.toLowerCase() === (currentWallet || "").toLowerCase()
+      });
     }
 
-    const rows = [{
-      rank: 1,
-      wallet: wallet,
-      honey: honeyBalance,
-      tier: tier,
-      nftCount: nftBalance,
-      nftId: nftIdDisplay,
-      isCurrent: true
-    }];
+    rows.sort((a, b) => b.honey - a.honey);
 
     tbody.innerHTML = "";
-    rows.forEach((row) => {
+
+    rows.forEach((row, index) => {
       const tierName = row.tier === 1 ? "Bronze" : row.tier === 2 ? "Silver" : "Gold";
       const tierClass = row.tier === 1 ? "bronze" : row.tier === 2 ? "silver" : "gold";
 
@@ -55,7 +74,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
       if (row.isCurrent) tr.classList.add("current-user");
 
       tr.innerHTML = `
-        <td class="rank">${row.rank}</td>
+        <td class="rank">${index + 1}</td>
         <td><span class="wallet">${row.wallet.substring(0,8)}...${row.wallet.substring(36)}</span></td>
         <td><strong>${row.honey.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
         <td class="tier ${tierClass}">${tierName}</td>
@@ -66,7 +85,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
     });
 
   } catch (e) {
-    console.error(e);
+    console.error("Leaderboard error:", e);
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red; padding:60px;">Error loading leaderboard.<br>Please connect wallet and try again.</td></tr>`;
   }
 };
