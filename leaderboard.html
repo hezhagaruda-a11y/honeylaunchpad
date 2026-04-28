@@ -114,9 +114,6 @@
   </div>
 
   <h1>🍯 Honey Launchpad Leaderboard</h1>
-  <p style="color: var(--text); opacity: 0.85; margin-bottom:24px; font-weight: 500;">
-    Top HONEY holders by balance • Investor Tier shown
-  </p>
 
   <div class="card">
     <table id="leaderboardTable">
@@ -138,10 +135,12 @@
 
   <button onclick="loadLeaderboard()" style="width:100%; padding:16px; font-size:17px;">🔄 Refresh Leaderboard</button>
 
-  <p style="text-align:center; margin-top:30px; color: var(--text); opacity: 0.7; font-size:0.95em;">
-    Only wallets that have interacted with the protocol are shown.<br>
-    The game is just beginning.
-  </p>
+  <div style="background: var(--card-bg); padding: 20px; border-radius: 12px; margin-top: 30px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+    <p style="color: var(--text); opacity: 0.7; font-size:0.95em; margin:0;">
+      Only wallets that have interacted with the protocol are shown.<br>
+      The game is just beginning.
+    </p>
+  </div>
 
   <script>
     document.getElementById("themeToggle").onclick = () => {
