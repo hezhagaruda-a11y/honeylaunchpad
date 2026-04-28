@@ -4,7 +4,11 @@ const HONEY = "0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2";
 const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
-const NFT_ABI = ["function balanceOf(address) view returns (uint256)", "function getUserTier(address) view returns (uint256)"];
+const NFT_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function tokenOfOwnerByIndex(address,uint256) view returns (uint256)",
+  "function getUserTier(address) view returns (uint256)"
+];
 
 let provider;
 
@@ -17,20 +21,20 @@ window.loadLeaderboard = async function loadLeaderboard() {
     const signer = await provider.getSigner();
     const wallet = await signer.getAddress();
 
-    const nft = new ethers.Contract(NFT, NFT_ABI, provider);
-    const tier = Number(await nft.getUserTier(wallet));
-
-    if (tier === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:60px; color:#f57c00; font-size:1.1em;">
-        🍯 This Leaderboard is <strong>Investor NFT Exclusive</strong><br><br>
-        Only holders of Bronze, Silver, or Gold Investor NFTs can view the full rankings.
-      </td></tr>`;
-      return;
-    }
-
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
+    const nft = new ethers.Contract(NFT, NFT_ABI, provider);
+
     const honeyBalance = Number(await honey.balanceOf(wallet)) / 1e18;
     const nftBalance = Number(await nft.balanceOf(wallet));
+    const tier = nftBalance > 0 ? Number(await nft.getUserTier(wallet)) : 0;
+
+    let nftIdDisplay = "—";
+    if (nftBalance === 1) {
+      const tokenId = await nft.tokenOfOwnerByIndex(wallet, 0);
+      nftIdDisplay = tokenId.toString();
+    } else if (nftBalance > 1) {
+      nftIdDisplay = "Multiple";
+    }
 
     const rows = [{
       rank: 1,
@@ -38,7 +42,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
       honey: honeyBalance,
       tier: tier,
       nftCount: nftBalance,
-      nftId: nftBalance > 0 ? "Multiple" : "—",
+      nftId: nftIdDisplay,
       isCurrent: true
     }];
 
