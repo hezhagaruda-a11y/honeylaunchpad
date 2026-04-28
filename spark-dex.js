@@ -62,7 +62,6 @@ async function loadLiveHoneyPrice() {
   }
 }
 
-// Real-time calculation
 document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('swapAmount');
   const receiveDisplay = document.getElementById('youWillReceive');

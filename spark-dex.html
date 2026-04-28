@@ -6,113 +6,39 @@
   <title>Honey Launchpad • Spark DEX</title>
   <script type="module" src="spark-dex.js"></script>
   <style>
-    :root {
-      --bg: #f5f5f5;
-      --card-bg: white;
-      --text: #111;
-      --accent: #4caf50;
-    }
-    [data-theme="dark"] {
-      --bg: #0f0f0f;
-      --card-bg: #1a1a1a;
-      --text: #f0f0f0;
-      --accent: #4caf50;
-    }
-    body { 
-      font-family: Arial; 
-      background: var(--bg);
-      background-image: 
-        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
-      background-size: 58px 33px;
-      color: var(--text); 
-      padding: 20px; 
-      max-width: 700px; 
-      margin: auto; 
-      transition: background 0.3s;
-    }
-    .card { 
-      background: var(--card-bg); 
-      padding: 20px; 
-      margin-top: 20px; 
-      border-radius: 12px; 
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
-      border: 1px solid #ddd;
-    }
-    [data-theme="dark"] .card {
-      border: 1px solid #333;
-    }
-    button { 
-      padding: 14px 20px; 
-      border: none; 
-      background: #111; 
-      color: white; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-size: 16px;
-      min-height: 48px;
-    }
-    [data-theme="dark"] button {
-      background: white;
-      color: #111;
-    }
-    .theme-toggle {
-      padding: 10px 12px;
-      font-size: 22px;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #111;
-      color: white;
-      box-shadow: 0 0 12px #4fc3f7;
-    }
-    [data-theme="dark"] .theme-toggle {
-      background: white;
-      color: #111;
-      box-shadow: 0 0 12px #4fc3f7;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
+    :root { --bg: #f5f5f5; --card-bg: white; --text: #111; --accent: #4caf50; }
+    [data-theme="dark"] { --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #f0f0f0; --accent: #4caf50; }
+    body { font-family: Arial; background: var(--bg); background-image: linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%), linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%), linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%), linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%); background-size: 58px 33px; color: var(--text); padding: 20px; max-width: 700px; margin: auto; transition: background 0.3s; }
+    .card { background: var(--card-bg); padding: 20px; margin-top: 20px; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); border: 1px solid #ddd; }
+    [data-theme="dark"] .card { border: 1px solid #333; }
+    button { padding: 14px 20px; border: none; background: #111; color: white; border-radius: 8px; cursor: pointer; font-size: 16px; min-height: 48px; }
+    [data-theme="dark"] button { background: white; color: #111; }
+    .theme-toggle { padding: 10px 12px; font-size: 22px; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #111; color: white; box-shadow: 0 0 12px #4fc3f7; }
+    [data-theme="dark"] .theme-toggle { background: white; color: #111; box-shadow: 0 0 12px #4fc3f7; }
+    input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
   </style>
 </head>
 <body>
-  <!-- Dark Mode Toggle -->
   <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
     <button id="themeToggle" class="theme-toggle">🌙</button>
   </div>
-
   <h2>🔥 Spark DEX • Buy HONEY</h2>
-
   <div class="card">
     <button id="connectBtn" style="width:100%;">Connect Wallet</button>
     <p id="wallet" style="margin-top:10px; font-size:0.9em;"></p>
     <p id="usdcBalance" class="balance">USDC Balance: Loading...</p>
     <p id="honeyBalance" class="balance">HONEY Balance: Loading...</p>
   </div>
-
   <div class="card">
     <h3>Live Honey Price</h3>
     <p id="honeyPriceDisplay">Loading live price...</p>
   </div>
-
   <div class="card">
     <h3>Sell USDC → Buy HONEY</h3>
     <input id="swapAmount" type="number" value="300" placeholder="Amount in USDC" style="width:100%; padding:12px; margin-bottom:10px; font-size:16px;">
     <p id="youWillReceive" style="margin:8px 0; font-size:15px; font-weight:500;">You will receive: — HONEY</p>
     <button onclick="performSwap()" style="background:#4caf50; width:100%;">Swap USDC for HONEY</button>
   </div>
-
   <p id="status"></p>
 </body>
 </html>
