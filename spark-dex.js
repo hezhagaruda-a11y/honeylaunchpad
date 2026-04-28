@@ -1,7 +1,7 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 const HONEY = "0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2";
-const USDC = "0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93";   // Correct USDC address
+const USDC = "0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93";
 const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
@@ -61,6 +61,19 @@ async function loadLiveHoneyPrice() {
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00400000 USDC</strong> (Simulated Spark DEX Pool)`;
   }
 }
+
+// Real-time calculation on input change
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('swapAmount');
+  const receiveDisplay = document.getElementById('youWillReceive');
+
+  input.addEventListener('input', () => {
+    if (!currentLivePrice) return;
+    const usdcAmount = parseFloat(input.value) || 0;
+    const honeyAmount = usdcAmount / currentLivePrice;
+    receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong>`;
+  });
+});
 
 window.performSwap = async () => {
   alert("Swap functionality coming in next iteration.");

@@ -77,15 +77,16 @@ async function loadLiveHoneyPrice() {
       const id = tier === "1" ? "bronzeHONEY" : tier === "2" ? "silverHONEY" : "goldHONEY";
       const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById(id).innerHTML = `
-        Requires <strong>${formatted} HONEY</strong> (${TIER_USD[tier]} USDC equivalent)
+        Requires <strong>${formatted} HONEY</strong><br>
+        <span style="font-size:0.95em; opacity:0.8;">(${TIER_USD[tier]} USDC equivalent)</span>
       `;
     });
   } catch (e) {
     console.error("Live price fetch failed", e);
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00400000 USDC</strong> (Simulated Spark DEX Pool)`;
-    document.getElementById("bronzeHONEY").innerHTML = `Requires <strong>75,000.00 HONEY</strong> (300 USDC equivalent)`;
-    document.getElementById("silverHONEY").innerHTML = `Requires <strong>250,000.00 HONEY</strong> (1000 USDC equivalent)`;
-    document.getElementById("goldHONEY").innerHTML = `Requires <strong>1,250,000.00 HONEY</strong> (5000 USDC equivalent)`;
+    document.getElementById("bronzeHONEY").innerHTML = `Requires <strong>75,000.00 HONEY</strong><br><span style="font-size:0.95em; opacity:0.8;">(300 USDC equivalent)</span>`;
+    document.getElementById("silverHONEY").innerHTML = `Requires <strong>250,000.00 HONEY</strong><br><span style="font-size:0.95em; opacity:0.8;">(1,000 USDC equivalent)</span>`;
+    document.getElementById("goldHONEY").innerHTML = `Requires <strong>1,250,000.00 HONEY</strong><br><span style="font-size:0.95em; opacity:0.8;">(5,000 USDC equivalent)</span>`;
   }
 }
 

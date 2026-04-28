@@ -76,6 +76,14 @@
       color: #111;
       box-shadow: 0 0 12px #4fc3f7;
     }
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -100,8 +108,8 @@
 
   <div class="card">
     <h3>Sell USDC → Buy HONEY</h3>
-    <input id="swapAmount" type="number" placeholder="Amount in USDC" style="width:100%; padding:12px; margin-bottom:10px; font-size:16px;">
-    <p id="youWillReceive" style="margin:8px 0; font-size:15px;">You will receive: — HONEY</p>
+    <input id="swapAmount" type="number" value="300" placeholder="Amount in USDC" style="width:100%; padding:12px; margin-bottom:10px; font-size:16px;">
+    <p id="youWillReceive" style="margin:8px 0; font-size:15px; font-weight:500;">You will receive: — HONEY</p>
     <button onclick="performSwap()" style="background:#4caf50; width:100%;">Swap USDC for HONEY</button>
   </div>
 
