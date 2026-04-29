@@ -15,7 +15,6 @@ window.loadLeaderboard = async function loadLeaderboard() {
 
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
 
-    // Demo wallets + current connected wallet if available
     const demoWallets = [
       "0xFD242c04fA7De83fc5BdBa5033122646373B5ce2",
       "0x7ee4fe6dc352f830d7f57e2e99cab462c05d5882",
@@ -24,7 +23,6 @@ window.loadLeaderboard = async function loadLeaderboard() {
 
     const rows = [];
 
-    // Try to add current connected wallet
     let currentWallet = null;
     try {
       const signer = await provider.getSigner();
@@ -32,11 +30,14 @@ window.loadLeaderboard = async function loadLeaderboard() {
       demoWallets.unshift(currentWallet);
     } catch (e) {}
 
-    for (const wallet of demoWallets) {
+    // Remove duplicates
+    const uniqueWallets = [...new Set(demoWallets)];
+
+    for (const wallet of uniqueWallets) {
       const honeyBalance = await honey.balanceOf(wallet).catch(() => 0);
       const balance = Number(honeyBalance) / 1e18;
 
-      if (balance > 0) {   // Only show wallets with actual HONEY
+      if (balance > 0) {
         rows.push({
           wallet: wallet,
           honey: balance
@@ -44,7 +45,6 @@ window.loadLeaderboard = async function loadLeaderboard() {
       }
     }
 
-    // Sort by HONEY balance descending
     rows.sort((a, b) => b.honey - a.honey);
 
     tbody.innerHTML = "";

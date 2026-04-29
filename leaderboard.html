@@ -97,10 +97,13 @@
   </div>
 
   <h1>🏆 Honey Launchpad Leaderboard</h1>
-  <p style="color: var(--text); opacity: 0.85; margin-bottom:20px; font-weight: 500;">
-    Top HONEY holders by balance
-  </p>
 
+  <!-- Subtitle Card -->
+  <div class="card" style="text-align:center; font-size:1.1em; font-weight:500; color:var(--text);">
+    Top HONEY holders by balance
+  </div>
+
+  <!-- Main Leaderboard Table -->
   <div class="card">
     <table id="leaderboardTable">
       <thead>
@@ -118,10 +121,11 @@
 
   <button onclick="loadLeaderboard()" style="width:100%; padding:14px;">🔄 Refresh Leaderboard</button>
 
-  <p style="text-align:center; margin-top:30px; color: var(--text); opacity: 0.7; font-size:0.9em;">
+  <!-- Footer Card -->
+  <div class="card" style="text-align:center; color:var(--text); opacity:0.75; font-size:0.95em;">
     Only wallets that have interacted with the protocol are shown.<br>
     The game is just beginning.
-  </p>
+  </div>
 
   <script>
     document.getElementById("themeToggle").onclick = () => {
