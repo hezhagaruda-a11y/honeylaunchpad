@@ -36,6 +36,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
       const honeyBalance = await honey.balanceOf(wallet).catch(() => 0);
       const balance = Number(honeyBalance) / 1e18;
 
+      // Only include wallets with more than 0 HONEY (as per your final request)
       if (balance > 0) {
         rows.push({
           wallet: wallet,
@@ -56,7 +57,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
       tr.innerHTML = `
         <td class="rank">${index + 1}</td>
         <td><span class="wallet">${row.wallet.substring(0,8)}...${row.wallet.substring(36)}</span></td>
-        <td><strong>${row.honey.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+        <td><strong>${row.honey.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
       `;
       tbody.appendChild(tr);
     });
