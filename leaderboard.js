@@ -30,7 +30,6 @@ window.loadLeaderboard = async function loadLeaderboard() {
       demoWallets.unshift(currentWallet);
     } catch (e) {}
 
-    // Remove duplicates
     const uniqueWallets = [...new Set(demoWallets)];
 
     for (const wallet of uniqueWallets) {
@@ -40,7 +39,8 @@ window.loadLeaderboard = async function loadLeaderboard() {
       if (balance > 0) {
         rows.push({
           wallet: wallet,
-          honey: balance
+          honey: balance,
+          isCurrent: wallet.toLowerCase() === (currentWallet || "").toLowerCase()
         });
       }
     }
@@ -51,6 +51,8 @@ window.loadLeaderboard = async function loadLeaderboard() {
 
     rows.forEach((row, index) => {
       const tr = document.createElement("tr");
+      if (row.isCurrent) tr.classList.add("current-user");
+
       tr.innerHTML = `
         <td class="rank">${index + 1}</td>
         <td><span class="wallet">${row.wallet.substring(0,8)}...${row.wallet.substring(36)}</span></td>

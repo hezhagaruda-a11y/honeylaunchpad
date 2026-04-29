@@ -72,6 +72,12 @@
       font-family: monospace;
       font-size: 15px;
     }
+    .current-user {
+      background: #fff7e6 !important;
+    }
+    [data-theme="dark"] .current-user {
+      background: #3a2a00 !important;
+    }
     .theme-toggle {
       padding: 10px 12px;
       font-size: 22px;
@@ -98,8 +104,8 @@
 
   <h1>🏆 Honey Launchpad Leaderboard</h1>
 
-  <!-- Subtitle Card -->
-  <div class="card" style="text-align:center; font-size:1.1em; font-weight:500; color:var(--text);">
+  <!-- Subtitle Card - larger, bolder, highlighted -->
+  <div class="card" style="text-align:center; font-size:1.25em; font-weight:700; color:var(--text); padding:18px;">
     Top HONEY holders by balance
   </div>
 
@@ -119,10 +125,10 @@
     </table>
   </div>
 
-  <button onclick="loadLeaderboard()" style="width:100%; padding:14px;">🔄 Refresh Leaderboard</button>
+  <button onclick="loadLeaderboard()" style="width:100%; padding:14px; margin-bottom:40px;">🔄 Refresh Leaderboard</button>
 
-  <!-- Footer Card -->
-  <div class="card" style="text-align:center; color:var(--text); opacity:0.75; font-size:0.95em;">
+  <!-- Footer Card - more spaced out -->
+  <div class="card" style="text-align:center; color:var(--text); opacity:0.75; font-size:0.95em; padding:22px;">
     Only wallets that have interacted with the protocol are shown.<br>
     The game is just beginning.
   </div>
