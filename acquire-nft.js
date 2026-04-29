@@ -68,14 +68,19 @@ async function loadLiveHoneyPrice() {
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
+    // Smart decimal trimming (same logic as Spark DEX)
+    let priceStr = currentLivePrice.toFixed(8);
+    priceStr = priceStr.replace(/0+$/, ''); // remove trailing zeros
+    if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
+
     document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>${currentLivePrice.toFixed(8)} USDC</strong> (Simulated Spark DEX Pool)
+      Live Honey Price: <strong>${priceStr} USDC</strong> (Simulated Spark DEX Pool)
     `;
 
     Object.keys(TIER_USD).forEach(tier => {
       const honeyNeeded = TIER_USD[tier] / currentLivePrice;
       const id = tier === "1" ? "bronzeHONEY" : tier === "2" ? "silverHONEY" : "goldHONEY";
-      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
       document.getElementById(id).innerHTML = `
         Requires <strong>${formatted} HONEY</strong><br>
         <span style="font-size:0.95em; opacity:0.8;">(${TIER_USD[tier]} USDC equivalent)</span>
@@ -83,10 +88,7 @@ async function loadLiveHoneyPrice() {
     });
   } catch (e) {
     console.error("Live price fetch failed", e);
-    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00400000 USDC</strong> (Simulated Spark DEX Pool)`;
-    document.getElementById("bronzeHONEY").innerHTML = `Requires <strong>75,000.00 HONEY</strong><br><span style="font-size:0.95em; opacity:0.8;">(300 USDC equivalent)</span>`;
-    document.getElementById("silverHONEY").innerHTML = `Requires <strong>250,000.00 HONEY</strong><br><span style="font-size:0.95em; opacity:0.8;">(1,000 USDC equivalent)</span>`;
-    document.getElementById("goldHONEY").innerHTML = `Requires <strong>1,250,000.00 HONEY</strong><br><span style="font-size:0.95em; opacity:0.8;">(5,000 USDC equivalent)</span>`;
+    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.004 USDC</strong> (Simulated Spark DEX Pool)`;
   }
 }
 
@@ -127,7 +129,17 @@ window.mintTier = async (tier) => {
 
     await mintTx.wait();
 
-    document.getElementById("status").innerHTML = `<span style="color:#4caf50">✅ Successfully minted Tier ${tier}!</span>`;
+    // Celebratory generational wealth message
+    const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
+    document.getElementById("status").innerHTML = `
+      <span style="color:#4caf50; font-size:1.15em; line-height:1.6;">
+        🎉 Congratulations!<br><br>
+        You have successfully minted a <strong>${tierName} Investor NFT</strong>!<br><br>
+        This is your key to <strong>generational wealth building</strong> and gives you 
+        priority access + tiered discounts on <strong>ALL future IDO launches</strong>.
+      </span>
+    `;
+
     await showCurrentTier();
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
