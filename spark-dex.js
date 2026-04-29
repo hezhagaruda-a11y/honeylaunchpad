@@ -53,7 +53,7 @@ async function loadPoolState() {
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
-    // Live Honey Price: clean number, no trailing zeros
+    // Live Honey Price: clean, no trailing zeros
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
     document.getElementById("honeyPriceDisplay").innerHTML = `
       Live Honey Price: <strong>${priceStr} USDC</strong>
@@ -80,7 +80,7 @@ function updateQuote() {
     return;
   }
   const honeyAmount = usdcAmount / currentLivePrice;
-  receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 4})} HONEY</strong>`;
+  receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong>`;
 }
 
 window.performSwap = async () => {
@@ -118,7 +118,8 @@ window.performSwap = async () => {
     const tx = await pool.swap(0, honeyOutMin, await signer.getAddress(), "0x");
     await tx.wait();
 
-    statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${(usdcAmount / currentLivePrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 4})} HONEY</strong></span>`;
+    const honeyReceived = usdcAmount / currentLivePrice;
+    statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${honeyReceived.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
 
     await updateBalances();
     await loadPoolState();
