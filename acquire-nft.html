@@ -69,10 +69,12 @@
       justify-content: center;
       background: #111;
       color: white;
+      box-shadow: 0 0 12px #4fc3f7;
     }
     [data-theme="dark"] .theme-toggle {
       background: white;
       color: #111;
+      box-shadow: 0 0 12px #4fc3f7;
     }
     .price {
       font-size: 1.1em;
@@ -125,9 +127,9 @@
     <button onclick="mintTier(3)">Mint Gold</button>
   </div>
 
-  <!-- New Real-live Acquisitions Section -->
+  <!-- Real-live Acquisitions Section -->
   <div class="card">
-    <h3>Real-live Investor NFT & Tier Acquired</h3>
+    <h3>Investor NFT Acquisitions - Latest 10</h3>
     <p style="margin-bottom:12px; color:#666;">Purchased for HONEY</p>
     <table id="acquisitionsTable" style="width:100%; border-collapse:collapse;">
       <thead>
@@ -139,7 +141,7 @@
       </thead>
       <tbody id="acquisitionsBody"></tbody>
     </table>
-    <button onclick="refreshAcquisitions()" style="width:100%; margin-top:16px; padding:12px;">🔄 Refresh Acquisitions</button>
+    <button onclick="refreshAcquisitions()" style="width:100%; margin-top:16px; padding:12px; background:#111; color:white; box-shadow: 0 0 12px #4caf50;">🔄 Refresh Acquisitions</button>
   </div>
 
   <p id="status"></p>
