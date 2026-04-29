@@ -13,6 +13,9 @@ const NFT_ABI = ["function mintBronze()", "function mintSilver()", "function min
 let signer, provider;
 let currentLivePrice = null;
 
+// History of acquisitions (persisted in localStorage)
+let acquisitionsHistory = [];
+
 async function connectWallet() {
   try {
     if (!window.ethereum) {
@@ -68,7 +71,6 @@ async function loadLiveHoneyPrice() {
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
-    // Clean price display (smart decimals)
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
     if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
 
@@ -128,39 +130,69 @@ window.mintTier = async (tier) => {
 
     await mintTx.wait();
 
+    // Record the acquisition
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
     const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
-    const statusEl = document.getElementById("status");
-    statusEl.innerHTML = `
-      <span style="color:#4caf50; font-size:1.2em; line-height:1.6;">
+
+    acquisitionsHistory.unshift({
+      time: timeStr,
+      tier: tierName,
+      honeyPaid: honeyNeeded.toFixed(2)
+    });
+
+    // Keep only latest 10
+    if (acquisitionsHistory.length > 10) acquisitionsHistory.pop();
+
+    // Save to localStorage
+    localStorage.setItem("acquisitionsHistory", JSON.stringify(acquisitionsHistory));
+
+    // Show success message
+    const tierNameFull = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
+    document.getElementById("status").innerHTML = `
+      <span style="color:#4caf50; font-size:1.15em; line-height:1.6;">
         🎉 Congratulations!<br><br>
-        You have successfully minted a <strong>${tierName} Investor NFT</strong>!<br><br>
+        You have successfully minted a <strong>${tierNameFull} Investor NFT</strong>!<br><br>
         This is your key to <strong>generational wealth building</strong> and gives you 
         priority access + tiered discounts on <strong>ALL future IDO launches</strong>.
       </span>
     `;
-    statusEl.classList.add("show");
-
-    // Auto-hide after 8 seconds
-    setTimeout(() => {
-      statusEl.classList.remove("show");
-    }, 8000);
 
     await showCurrentTier();
     await updateHoneyBalance();
     await loadLiveHoneyPrice();
+    await renderAcquisitions();
   } catch (e) {
     console.error("Mint error:", e);
     let msg = "Mint failed. ";
     if (e.reason) msg += e.reason;
     else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
     else msg += e.message || "Unknown error";
-
-    const statusEl = document.getElementById("status");
-    statusEl.innerHTML = `<span style="color:#f44336;">❌ ${msg}</span>`;
-    statusEl.classList.add("show");
-
-    setTimeout(() => statusEl.classList.remove("show"), 8000);
+    document.getElementById("status").innerHTML = `<span style="color:red">❌ ${msg}</span>`;
   }
+};
+
+function renderAcquisitions() {
+  const tbody = document.getElementById("acquisitionsBody");
+  tbody.innerHTML = "";
+
+  acquisitionsHistory.forEach(entry => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${entry.time}</td>
+      <td><strong>${entry.tier}</strong></td>
+      <td style="text-align:right;"><strong>${entry.honeyPaid}</strong> HONEY</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (acquisitionsHistory.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:#888;">No acquisitions yet. Mint your first Investor NFT!</td></tr>`;
+  }
+}
+
+window.refreshAcquisitions = function refreshAcquisitions() {
+  renderAcquisitions();
 };
 
 document.getElementById("themeToggle").onclick = () => {
@@ -172,5 +204,14 @@ document.getElementById("themeToggle").onclick = () => {
 
 document.getElementById("connectBtn").onclick = connectWallet;
 
+// Load history from localStorage on start
+function loadAcquisitionsHistory() {
+  const saved = localStorage.getItem("acquisitionsHistory");
+  if (saved) {
+    acquisitionsHistory = JSON.parse(saved);
+  }
+}
+
 // Initial load
+loadAcquisitionsHistory();
 loadLiveHoneyPrice();
