@@ -5,7 +5,7 @@ const USDC = "0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93";
 const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
-const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)"];
+const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];
 const PAIR_ABI = ["function swap(uint256,uint256,address,bytes)"];
 
 let signer, provider;
@@ -53,21 +53,21 @@ async function loadPoolState() {
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
+    // Live Honey Price: clean number, no trailing zeros
+    let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
     document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>${currentLivePrice.toFixed(8)} USDC</strong>
+      Live Honey Price: <strong>${priceStr} USDC</strong>
     `;
 
     document.getElementById("poolState").innerHTML = `
       Pool Reserves:<br>
-      • USDC: <strong>${usdcReserve.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong><br>
-      • HONEY: <strong>${honeyReserve.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong><br>
-      • Total Liquidity: <strong>$${(usdcReserve + honeyReserve * currentLivePrice).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+      • USDC: <strong>${usdcReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong><br>
+      • HONEY: <strong>${honeyReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
     `;
 
     updateQuote();
   } catch (e) {
     console.error("Pool state fetch failed", e);
-    document.getElementById("poolState").innerHTML = `Pool state unavailable.`;
   }
 }
 
@@ -80,7 +80,7 @@ function updateQuote() {
     return;
   }
   const honeyAmount = usdcAmount / currentLivePrice;
-  receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong>`;
+  receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 4})} HONEY</strong>`;
 }
 
 window.performSwap = async () => {
@@ -107,7 +107,7 @@ window.performSwap = async () => {
     const pool = new ethers.Contract(SPARK_POOL, PAIR_ABI, signer);
 
     const usdcToSwap = ethers.parseUnits(usdcAmount.toString(), 6);
-    const honeyOutMin = ethers.parseUnits((usdcAmount / currentLivePrice * 0.97).toString(), 18); // 3% slippage
+    const honeyOutMin = ethers.parseUnits((usdcAmount / currentLivePrice * 0.97).toString(), 18);
 
     const allowance = await usdc.allowance(await signer.getAddress(), SPARK_POOL);
     if (allowance < usdcToSwap) {
@@ -118,7 +118,7 @@ window.performSwap = async () => {
     const tx = await pool.swap(0, honeyOutMin, await signer.getAddress(), "0x");
     await tx.wait();
 
-    statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${(usdcAmount / currentLivePrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
+    statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${(usdcAmount / currentLivePrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 4})} HONEY</strong></span>`;
 
     await updateBalances();
     await loadPoolState();
