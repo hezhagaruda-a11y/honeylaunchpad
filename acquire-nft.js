@@ -68,9 +68,8 @@ async function loadLiveHoneyPrice() {
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
-    // Smart decimal trimming (same logic as Spark DEX)
-    let priceStr = currentLivePrice.toFixed(8);
-    priceStr = priceStr.replace(/0+$/, ''); // remove trailing zeros
+    // Smart decimal trimming for clean price display
+    let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
     if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
 
     document.getElementById("honeyPriceDisplay").innerHTML = `
@@ -80,10 +79,10 @@ async function loadLiveHoneyPrice() {
     Object.keys(TIER_USD).forEach(tier => {
       const honeyNeeded = TIER_USD[tier] / currentLivePrice;
       const id = tier === "1" ? "bronzeHONEY" : tier === "2" ? "silverHONEY" : "goldHONEY";
-      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      // Only two decimals for "Requires"
+      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById(id).innerHTML = `
-        Requires <strong>${formatted} HONEY</strong><br>
-        <span style="font-size:0.95em; opacity:0.8;">(${TIER_USD[tier]} USDC equivalent)</span>
+        Requires <strong>${formatted} HONEY</strong>
       `;
     });
   } catch (e) {
@@ -129,7 +128,6 @@ window.mintTier = async (tier) => {
 
     await mintTx.wait();
 
-    // Celebratory generational wealth message
     const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
     document.getElementById("status").innerHTML = `
       <span style="color:#4caf50; font-size:1.15em; line-height:1.6;">
