@@ -68,7 +68,7 @@ async function loadLiveHoneyPrice() {
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
-    // Smart decimal trimming for clean price display
+    // Clean price display (smart decimals)
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
     if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
 
@@ -79,10 +79,10 @@ async function loadLiveHoneyPrice() {
     Object.keys(TIER_USD).forEach(tier => {
       const honeyNeeded = TIER_USD[tier] / currentLivePrice;
       const id = tier === "1" ? "bronzeHONEY" : tier === "2" ? "silverHONEY" : "goldHONEY";
-      // Only two decimals for "Requires"
       const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById(id).innerHTML = `
-        Requires <strong>${formatted} HONEY</strong>
+        Requires <strong>${formatted} HONEY</strong><br>
+        <span style="font-size:0.95em; opacity:0.8; color:#4caf50;">(${TIER_USD[tier]} USDC equivalent)</span>
       `;
     });
   } catch (e) {
@@ -129,14 +129,21 @@ window.mintTier = async (tier) => {
     await mintTx.wait();
 
     const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
-    document.getElementById("status").innerHTML = `
-      <span style="color:#4caf50; font-size:1.15em; line-height:1.6;">
+    const statusEl = document.getElementById("status");
+    statusEl.innerHTML = `
+      <span style="color:#4caf50; font-size:1.2em; line-height:1.6;">
         🎉 Congratulations!<br><br>
         You have successfully minted a <strong>${tierName} Investor NFT</strong>!<br><br>
         This is your key to <strong>generational wealth building</strong> and gives you 
         priority access + tiered discounts on <strong>ALL future IDO launches</strong>.
       </span>
     `;
+    statusEl.classList.add("show");
+
+    // Auto-hide after 8 seconds
+    setTimeout(() => {
+      statusEl.classList.remove("show");
+    }, 8000);
 
     await showCurrentTier();
     await updateHoneyBalance();
@@ -147,7 +154,12 @@ window.mintTier = async (tier) => {
     if (e.reason) msg += e.reason;
     else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
     else msg += e.message || "Unknown error";
-    document.getElementById("status").innerHTML = `<span style="color:red">❌ ${msg}</span>`;
+
+    const statusEl = document.getElementById("status");
+    statusEl.innerHTML = `<span style="color:#f44336;">❌ ${msg}</span>`;
+    statusEl.classList.add("show");
+
+    setTimeout(() => statusEl.classList.remove("show"), 8000);
   }
 };
 

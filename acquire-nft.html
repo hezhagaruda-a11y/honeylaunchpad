@@ -69,10 +69,12 @@
       justify-content: center;
       background: #111;
       color: white;
+      box-shadow: 0 0 12px #4fc3f7;
     }
     [data-theme="dark"] .theme-toggle {
       background: white;
       color: #111;
+      box-shadow: 0 0 12px #4fc3f7;
     }
     .price {
       font-size: 1.1em;
@@ -83,6 +85,19 @@
       font-size: 0.95em;
       color: #666;
       margin-top: 8px;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.1em;
+      line-height: 1.6;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: none;
+    }
+    #status.show {
+      display: block;
     }
   </style>
 </head>
