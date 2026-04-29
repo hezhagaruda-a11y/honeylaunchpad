@@ -8,12 +8,18 @@ const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function approve(address,uint256)", "function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)"];
-const NFT_ABI = ["function mintBronze()", "function mintSilver()", "function mintGold()", "function getUserTier(address) view returns (uint256)"];
+const NFT_ABI = [
+  "function mintBronze()",
+  "function mintSilver()",
+  "function mintGold()",
+  "function getUserTier(address) view returns (uint256)",
+  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+];
 
 let signer, provider;
 let currentLivePrice = null;
 
-// History of acquisitions (persisted in localStorage)
+// History of acquisitions (historical + new)
 let acquisitionsHistory = [];
 
 async function connectWallet() {
@@ -130,10 +136,9 @@ window.mintTier = async (tier) => {
 
     await mintTx.wait();
 
-    // Record the acquisition
+    const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
-    const tierName = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
 
     acquisitionsHistory.unshift({
       time: timeStr,
@@ -141,22 +146,22 @@ window.mintTier = async (tier) => {
       honeyPaid: honeyNeeded.toFixed(2)
     });
 
-    // Keep only latest 10
     if (acquisitionsHistory.length > 10) acquisitionsHistory.pop();
 
-    // Save to localStorage
     localStorage.setItem("acquisitionsHistory", JSON.stringify(acquisitionsHistory));
 
-    // Show success message
-    const tierNameFull = tier === 1 ? "Bronze" : tier === 2 ? "Silver" : "Gold";
-    document.getElementById("status").innerHTML = `
+    const statusEl = document.getElementById("status");
+    statusEl.innerHTML = `
       <span style="color:#4caf50; font-size:1.15em; line-height:1.6;">
         🎉 Congratulations!<br><br>
-        You have successfully minted a <strong>${tierNameFull} Investor NFT</strong>!<br><br>
+        You have successfully minted a <strong>${tierName} Investor NFT</strong>!<br><br>
         This is your key to <strong>generational wealth building</strong> and gives you 
         priority access + tiered discounts on <strong>ALL future IDO launches</strong>.
       </span>
     `;
+    statusEl.classList.add("show");
+
+    setTimeout(() => statusEl.classList.remove("show"), 8000);
 
     await showCurrentTier();
     await updateHoneyBalance();
@@ -204,12 +209,10 @@ document.getElementById("themeToggle").onclick = () => {
 
 document.getElementById("connectBtn").onclick = connectWallet;
 
-// Load history from localStorage on start
+// Load history from localStorage + load historical on-chain mints (future enhancement)
 function loadAcquisitionsHistory() {
   const saved = localStorage.getItem("acquisitionsHistory");
-  if (saved) {
-    acquisitionsHistory = JSON.parse(saved);
-  }
+  if (saved) acquisitionsHistory = JSON.parse(saved);
 }
 
 // Initial load
