@@ -77,12 +77,10 @@
       justify-content: center;
       background: #111;
       color: white;
-      box-shadow: 0 0 12px #4fc3f7;
     }
     [data-theme="dark"] .theme-toggle {
       background: white;
       color: #111;
-      box-shadow: 0 0 12px #4fc3f7;
     }
   </style>
 </head>
@@ -94,13 +92,13 @@
 
   <h1>🍯 Honey Launchpad</h1>
 
-  <!-- 1. Acquire Investor NFT -->
-  <div onclick="window.location.href='acquire-nft.html'" class="action-card">
-    <h2 style="margin:0; font-size:22px;">🏆 Acquire Investor NFT</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Mint Bronze / Silver / Gold tiers</p>
+  <!-- 1. Leaderboard (Top - Public) -->
+  <div onclick="window.location.href='leaderboard.html'" class="action-card" style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white;">
+    <h2 style="margin:0; font-size:22px;">🏆 Leaderboard</h2>
+    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Top HONEY holders</p>
   </div>
 
-  <!-- 2. Spark DEX -->
+  <!-- 2. Spark DEX • Buy HONEY -->
   <div onclick="window.location.href='spark-dex.html'" class="action-card" style="background: linear-gradient(135deg, #ff9800, #f57c00);">
     <h2 style="margin:0; font-size:22px;">🔥 Spark DEX • Buy HONEY</h2>
     <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Real swaps • Live price discovery</p>
@@ -112,15 +110,15 @@
     <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Live DEX &amp; IDO activity • Open to all</p>
   </div>
 
-  <!-- 4. Leaderboard (NFT Gated) -->
-  <div onclick="window.location.href='leaderboard.html'" class="action-card" style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white;">
-    <h2 style="margin:0; font-size:22px;">🏆 Leaderboard</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Top HONEY holders • <strong>Investor NFT Exclusive</strong></p>
+  <!-- 4. Acquire Investor NFT (Key emoji, right above Connect Treasury) -->
+  <div onclick="window.location.href='acquire-nft.html'" class="action-card">
+    <h2 style="margin:0; font-size:22px;">🔑 Acquire Investor NFT</h2>
+    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Mint Bronze / Silver / Gold tiers</p>
   </div>
 
-  <!-- 5. Connect Treasury -->
+  <!-- 5. Connect Treasury (with strong gold halo) -->
   <div class="card">
-    <button id="connectBtn" style="background: #111; color: white;">
+    <button id="connectBtn" style="background: #111; color: white; box-shadow: 0 0 20px #ffd700, 0 0 30px #ffed9e;">
       👑 Connect Treasury
     </button>
   </div>
