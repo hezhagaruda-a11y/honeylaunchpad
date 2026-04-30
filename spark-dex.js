@@ -48,23 +48,19 @@ async function loadPoolState() {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
     const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
     const [reserve0, reserve1] = await pool.getReserves();
-
     const usdcReserve = Number(reserve0) / 1e6;
     const honeyReserve = Number(reserve1) / 1e18;
     currentLivePrice = usdcReserve / honeyReserve;
 
-    // Live Honey Price: clean, no trailing zeros
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
     document.getElementById("honeyPriceDisplay").innerHTML = `
       Live Honey Price: <strong>${priceStr} USDC</strong>
     `;
-
     document.getElementById("poolState").innerHTML = `
       Pool Reserves:<br>
       • USDC: <strong>${usdcReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong><br>
       • HONEY: <strong>${honeyReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
     `;
-
     updateQuote();
   } catch (e) {
     console.error("Pool state fetch failed", e);
