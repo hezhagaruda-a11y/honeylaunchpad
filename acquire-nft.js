@@ -19,7 +19,7 @@ const NFT_ABI = [
 let signer, provider;
 let currentLivePrice = null;
 
-// History of acquisitions (historical + new)
+// Combined history: on-chain past mints + new mints in this session
 let acquisitionsHistory = [];
 
 async function connectWallet() {
@@ -140,6 +140,7 @@ window.mintTier = async (tier) => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
 
+    // Add new mint to history
     acquisitionsHistory.unshift({
       time: timeStr,
       tier: tierName,
@@ -209,7 +210,7 @@ document.getElementById("themeToggle").onclick = () => {
 
 document.getElementById("connectBtn").onclick = connectWallet;
 
-// Load history from localStorage + load historical on-chain mints (future enhancement)
+// Load history from localStorage
 function loadAcquisitionsHistory() {
   const saved = localStorage.getItem("acquisitionsHistory");
   if (saved) acquisitionsHistory = JSON.parse(saved);
