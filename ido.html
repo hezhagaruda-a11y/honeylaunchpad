@@ -80,10 +80,11 @@
       color: #f0f0f0;
     }
     .address {
-      font-size: 0.9em;
+      font-size: 0.85em;
       word-break: break-all;
       color: #666;
       margin-top: 4px;
+      line-height: 1.3;
     }
     .theme-toggle {
       padding: 10px 12px;
@@ -94,6 +95,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #111;
+      color: white;
+      box-shadow: 0 0 12px #4fc3f7;
+    }
+    [data-theme="dark"] .theme-toggle {
+      background: white;
+      color: #111;
+      box-shadow: 0 0 12px #4fc3f7;
     }
   </style>
 </head>
@@ -112,18 +121,18 @@
   </div>
   <div id="countdownContainer" style="display:none;"></div>
   <div class="card">
-    <b>Your Allocation Limit</b><p id="allocation"></p>
+    <b>Your Allocation Limit</b>
+    <p id="allocation"></p>
+    <b>Your Purchase History in this Pool</b>
+    <p id="purchaseHistory" style="margin-top:8px; font-size:15px;">—</p>
   </div>
   <div class="card">
     <b>📊 Pool Status</b>
+    <p>USDC Raised: <span id="usdcRaised"></span></p>
     <p>Sold: <span id="sold"></span></p>
     <p>Remaining: <span id="remaining"></span></p>
     <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
     <p id="percent"></p>
-  </div>
-  <div class="card">
-    <b>Your Purchase History in this Pool</b>
-    <p id="purchaseHistory" style="margin-top:8px; font-size:15px;">—</p>
   </div>
   <div class="card">
     <b id="buySectionTitle">Buy Tokens</b>

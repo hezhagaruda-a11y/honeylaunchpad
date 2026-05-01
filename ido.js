@@ -106,16 +106,17 @@ async function refreshAll() {
   usdcBal = await usdc.balanceOf(user);
   purchased = await ido.purchased(user);
 
-  document.getElementById("balance").innerText = Number(ethers.formatUnits(usdcBal, 6)).toLocaleString() + " USDC";
+  // 2 decimal formatting
+  document.getElementById("balance").innerText = Number(ethers.formatUnits(usdcBal, 6)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDC";
 
   const cap = await ido.MAX_PER_WALLET();
   const price = await getPrice();
   const capUSDC = Number(ethers.formatUnits(cap * price / (10n ** 30n), 6));
-  document.getElementById("allocation").innerText = Number(ethers.formatUnits(cap, 18)).toLocaleString() + " " + meta.symbol + " (~" + capUSDC.toFixed(2) + " USDC)";
+  document.getElementById("allocation").innerText = Number(ethers.formatUnits(cap, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol + " (~" + capUSDC.toFixed(2) + " USDC)";
 
-  // Purchase history
+  // Merged Purchase History
   document.getElementById("purchaseHistory").innerHTML = `
-    You have already purchased <strong>${parseFloat(ethers.formatUnits(purchased, 18)).toLocaleString()}</strong> ${meta.symbol}
+    You have already purchased <strong>${parseFloat(ethers.formatUnits(purchased, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> ${meta.symbol}
   `;
 
   await refreshPoolState();
@@ -129,8 +130,13 @@ async function refreshPoolState() {
   const remainingNum = totalNum - soldNum;
   const percent = totalNum > 0 ? (soldNum / totalNum) * 100 : 0;
 
-  document.getElementById("sold").innerText = soldNum.toLocaleString() + " " + meta.symbol;
-  document.getElementById("remaining").innerText = remainingNum.toLocaleString() + " " + meta.symbol;
+  // USDC Raised calculation (approximate using current tier price)
+  const price = await getPrice();
+  const usdcRaised = Number(ethers.formatUnits(sold * price / (10n ** 30n), 6));
+
+  document.getElementById("usdcRaised").innerText = usdcRaised.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " USDC";
+  document.getElementById("sold").innerText = soldNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  document.getElementById("remaining").innerText = remainingNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
   document.getElementById("percent").innerText = percent.toFixed(2) + "% SOLD";
   document.getElementById("progressBar").style.width = percent + "%";
 }
@@ -150,7 +156,7 @@ async function updateQuote() {
   const payment = ethers.parseUnits(val, 6);
   const price = await getPrice();
   const tokens = (payment * 10n**12n * 10n**18n) / price;
-  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokens, 18)).toLocaleString() + " " + meta.symbol;
+  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokens, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
 }
 
 document.getElementById("usdcInput").oninput = updateQuote;
