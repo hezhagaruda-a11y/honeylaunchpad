@@ -27,25 +27,23 @@ const PROJECTS = {
 const params = new URLSearchParams(window.location.search);
 const pool = params.get("pool");
 if (!pool) { alert("Invalid pool address"); throw new Error("Missing pool param"); }
-document.getElementById("poolAddress").innerText = pool;
 
+document.getElementById("poolAddress").innerText = pool;
 const meta = PROJECTS[pool.toLowerCase()] || { name: "IDO", symbol: "TOK" };
 
-// Dynamic page title and buy section
 document.getElementById("pageTitle").innerText = `🍯 Honey Launchpad • ${meta.name}`;
 document.getElementById("buySectionTitle").innerText = `Buy ${meta.symbol} Tokens`;
 document.getElementById("buyBtn").innerText = `Buy ${meta.symbol} Tokens`;
 
 let signer, user, tier = 0, usdcBal = 0n, purchased = 0n, ido, startTime;
 
-// Tier minimums in USDC (6 decimals)
 const MIN_AMOUNT = {
-  1: ethers.parseUnits("300", 6),   // Bronze
-  2: ethers.parseUnits("1000", 6),  // Silver
-  3: ethers.parseUnits("5000", 6)   // Gold
+  1: ethers.parseUnits("300", 6),
+  2: ethers.parseUnits("1000", 6),
+  3: ethers.parseUnits("5000", 6)
 };
 
-// ====================== DARK MODE TOGGLE ======================
+// ====================== DARK MODE ======================
 const themeToggle = document.getElementById("themeToggle");
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
@@ -60,6 +58,7 @@ themeToggle.onclick = () => {
   setTheme(newTheme);
 };
 
+// ====================== CONNECT ======================
 document.getElementById("connect").onclick = async () => {
   const provider = new ethers.BrowserProvider(window.ethereum);
   signer = await provider.getSigner();
@@ -68,20 +67,22 @@ document.getElementById("connect").onclick = async () => {
 
   const nft = new ethers.Contract(NFT, NFT_ABI, provider);
   ido = new ethers.Contract(pool, IDO_ABI, signer);
+
   tier = Number(await nft.getUserTier(user));
   const tierNames = ["None","Bronze","Silver","Gold"];
   document.getElementById("tier").innerText = tierNames[tier];
 
   startTime = Number(await ido.startTime());
   startCountdown();
+
   await refreshAll();
+  setInterval(refreshAll, 8000); // Real-time updates
 };
 
 function startCountdown() {
   const container = document.getElementById("countdownContainer");
   container.style.display = "block";
-  container.innerHTML = `<strong>IDO Starts in:</strong> <span id="bigCountdown"></span>`;
-
+  container.innerHTML = `<strong>IDO Starts in:</strong> <span id="bigCountdown" style="font-size:22px;"></span>`;
   const update = () => {
     const now = Math.floor(Date.now() / 1000);
     const diff = startTime - now;
@@ -111,6 +112,11 @@ async function refreshAll() {
   const price = await getPrice();
   const capUSDC = Number(ethers.formatUnits(cap * price / (10n ** 30n), 6));
   document.getElementById("allocation").innerText = Number(ethers.formatUnits(cap, 18)).toLocaleString() + " " + meta.symbol + " (~" + capUSDC.toFixed(2) + " USDC)";
+
+  // Purchase history
+  document.getElementById("purchaseHistory").innerHTML = `
+    You have already purchased <strong>${parseFloat(ethers.formatUnits(purchased, 18)).toLocaleString()}</strong> ${meta.symbol}
+  `;
 
   await refreshPoolState();
 }
@@ -146,8 +152,8 @@ async function updateQuote() {
   const tokens = (payment * 10n**12n * 10n**18n) / price;
   document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokens, 18)).toLocaleString() + " " + meta.symbol;
 }
-document.getElementById("usdcInput").oninput = updateQuote;
 
+document.getElementById("usdcInput").oninput = updateQuote;
 document.getElementById("maxBtn").onclick = async () => {
   if (tier === 0) return;
   const price = await getPrice();
@@ -158,42 +164,34 @@ document.getElementById("maxBtn").onclick = async () => {
   document.getElementById("usdcInput").value = parseFloat(ethers.formatUnits(usable, 6)).toFixed(2);
   await updateQuote();
 };
-
 document.getElementById("minBtn").onclick = () => {
   if (tier === 0) return;
   const minUSDC = Number(ethers.formatUnits(MIN_AMOUNT[tier], 6));
   document.getElementById("usdcInput").value = minUSDC;
   updateQuote();
 };
-
 document.getElementById("buyBtn").onclick = async () => {
   try {
     if (!signer || tier === 0) { alert("You need an Investor NFT"); return; }
     const val = document.getElementById("usdcInput").value.trim();
     if (!val || Number(val) <= 0) { alert("Enter a valid amount"); return; }
-
     const payment = ethers.parseUnits(val, 6);
     const usdc = new ethers.Contract(USDC, ERC20_ABI, signer);
-
     const approveTx = await usdc.approve(pool, payment);
     await approveTx.wait();
-
     const buyTx = await ido.buy(payment);
     await buyTx.wait();
-
     await refreshAll();
     alert("🎉 Purchase successful! You received " + meta.symbol + " tokens.");
   } catch (err) {
     console.error(err);
     let msg = err?.reason || err?.message || "Transaction failed";
-
     if (msg.includes("Below min") || msg.includes("amount too low") || msg.includes("min amount")) {
       const minUSDC = Number(ethers.formatUnits(MIN_AMOUNT[tier], 6));
       const tierName = tier === 3 ? "Gold" : tier === 2 ? "Silver" : "Bronze";
       msg = `Amount is below minimum for ${tierName} tier (${minUSDC.toLocaleString()} USDC)`;
     }
     if (msg.includes("Wallet cap") || msg.includes("cap exceeded")) msg = "You reached your wallet allocation limit";
-
     alert("❌ " + msg);
   }
 };

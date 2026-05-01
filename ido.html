@@ -65,14 +65,15 @@
       border-radius: 6px;
     }
     .progress-container { width: 100%; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-    .progress-bar { height: 20px; background: #4caf50; width: 0%; }
+    .progress-bar { height: 20px; background: #4caf50; width: 0%; transition: width 0.6s ease; }
     #countdownContainer {
       background: #fff3cd;
-      padding: 12px;
-      border-radius: 8px;
+      padding: 16px;
+      border-radius: 12px;
       text-align: center;
-      font-size: 18px;
-      margin: 15px 0;
+      font-size: 20px;
+      font-weight: bold;
+      margin: 20px 0;
     }
     [data-theme="dark"] #countdownContainer {
       background: #3a2a00;
@@ -119,6 +120,10 @@
     <p>Remaining: <span id="remaining"></span></p>
     <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
     <p id="percent"></p>
+  </div>
+  <div class="card">
+    <b>Your Purchase History in this Pool</b>
+    <p id="purchaseHistory" style="margin-top:8px; font-size:15px;">—</p>
   </div>
   <div class="card">
     <b id="buySectionTitle">Buy Tokens</b>
