@@ -1,8 +1,8 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
-const HONEY = "0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2";
-const USDC = "0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93";
-const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
+const USDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
+const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];

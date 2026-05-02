@@ -1,6 +1,6 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
-const HONEY = "0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2";
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
 

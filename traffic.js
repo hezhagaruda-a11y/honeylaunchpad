@@ -1,6 +1,6 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-const FACTORY_ADDRESS = '0x1a8344bb318c99bFe8C1e7f823F1068aE6F8aeB8';
-const SPARK_DEX_POOL = '0x288728f3d24F9CC63771eB463f1D144d24C493F0';
+const FACTORY_ADDRESS = '0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0';
+const SPARK_DEX_POOL = '0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F';
 const RPC_URL = 'https://rpc.sepolia.org';
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const FACTORY_ABI = [

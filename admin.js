@@ -1,8 +1,8 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-const FACTORY = "0x1a8344bb318c99bFe8C1e7f823F1068aE6F8aeB8";
-const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
-const USDC = "0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93";
-const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
+const FACTORY = "0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0";
+const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
+const USDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
+const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
 const FACTORY_ABI = [
   "function getAllPools() view returns (address[])",
   "function launchIDO(address _saleToken, address _treasury, uint256 _startTime, uint256 _endTime, uint256 _totalSupplyForSale)"

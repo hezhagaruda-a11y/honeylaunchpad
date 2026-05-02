@@ -1,6 +1,6 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-const FACTORY = "0x1a8344bb318c99bFe8C1e7f823F1068aE6F8aeB8";
-const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
+const FACTORY = "0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0";
+const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
 const POOL_ABI = [
@@ -10,6 +10,12 @@ const POOL_ABI = [
   "function purchased(address) view returns (uint256)"
 ];
 const PROJECTS = {
+  "0x144b16aa20f5f3cddbbd3a3c9a89e53854435368": {
+    name: "HONEY Launch",
+    symbol: "HONEY",
+    logo: "https://picsum.photos/id/1015/40/40",
+    banner: "https://picsum.photos/id/1015/700/180"
+  },
   "0x81eb4d4279027a8b79b017c8d0c7e7d752511a0b": {
     name: "EEE Launch #1",
     symbol: "EEE",

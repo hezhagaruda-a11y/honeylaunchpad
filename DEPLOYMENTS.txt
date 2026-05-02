@@ -3,7 +3,9 @@ Date: [21/4/2026 14.49 Helsinki]
 
 Honey (protocol token): 0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2
 
-MockUSDC (payment token): 0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93
+MockETH (new payment token): 0x084283482cAA832eb629a2c7674C2454A8277597
+
+MockUSDC (old payment token): 0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93
 
 MockCCC (sale token): 0x7f4313FF0eD138030ac68cCB8D0cbcbC5F3aFAEA
 
@@ -11,33 +13,16 @@ MockDDD (sale token): 0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F
 
 InvestorNFT: 0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA
 
-IDOFactory: 0x0388C62Ad1d354d9cb1d3533e143034B4B690102
+New IDOFactory: 
+0x1a8344bb318c99bFe8C1e7f823F1068aE6F8aeB8
 
-1st try:
-First IDO Pool (CCC #1 Launch) Address: 0x8E8BD4f80d3B09584625059617bE316150e17466
+New IDO Pool launched from Remix Functions - HONEY POOL: 
+0x144b16Aa20f5F3CdDBBD3a3c9a89E53854435368
 
-2nd try:
-Second IDO Pool (CCC #2 Launch) Address: 0xb085D02f021Fc7c8Fa7F6c99Bb75547380A84845
 
-3rd try:
-Third IDO Pool (DDD #1 Launch) Address:
-0x7C5077D5E9A451d23eA0B5d4e70f25df71B39000
 
-4th try: 
-Fourth IDO Pool (DDD #2 Launch) Address:
-0x269aa56E463d0Ea5E8214CA7F55c6c4CA3204E00
 
-5th try:
-Re-Deployed a new IDOFactory.sol contract
-New POOL DDD  created with latest IDOFactory:
-0x1372B8dD99c74b6fbfee15Dbe11affDe6008E473
-
-6th try:
-Re-Deployed a new IDOFactory.sol contract
-New Pool DDD:
-0xFDEFCb25bbF1525C067a3033B68011EfFf0E63e2
-
-Spark Pool (Sepolia Test) Address:  0x288728f3d24F9CC63771eB463f1D144d24C493F0
+Spark Pool (Sepolia Test) Address: 0x288728f3d24F9CC63771eB463f1D144d24C493F0
 
 Notes:
 
