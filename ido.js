@@ -18,7 +18,7 @@ const IDO_ABI = [
 ];
 
 const PROJECTS = {
-  "0x144b16aa20f5f3cddbbd3a3c9a89e53854435368": { name: "HONEY Launch", symbol: "HONEY" },   // ← Your new pool
+  "0x144b16aa20f5f3cddbbd3a3c9a89e53854435368": { name: "HONEY Launch", symbol: "HONEY" },
   "0x81eb4d4279027a8b79b017c8d0c7e7d752511a0b": { name: "EEE Launch #1", symbol: "EEE" },
   "0x0857de57bdbf43fcc3df67f9a4076beb97f1c79b": { name: "DDD Launch #4", symbol: "DDD" },
   "0xfdefcb25bbf1525c067a3033b68011efff0e63e2": { name: "DDD Launch #3", symbol: "DDD" },
@@ -39,9 +39,9 @@ document.getElementById("buyBtn").innerText = `Buy ${meta.symbol} Tokens`;
 let signer, user, tier = 0, ethBal = 0n, purchased = 0n, ido, startTime;
 
 const MIN_AMOUNT_ETH = {
-  1: ethers.parseUnits("0.1", 18),   // Bronze
-  2: ethers.parseUnits("0.3", 18),   // Silver
-  3: ethers.parseUnits("1.5", 18)    // Gold
+  1: ethers.parseUnits("0.1", 18),
+  2: ethers.parseUnits("0.3", 18),
+  3: ethers.parseUnits("1.5", 18)
 };
 
 // ====================== DARK MODE ======================
@@ -153,7 +153,9 @@ async function updateQuote() {
   }
   const ethAmountBig = ethers.parseUnits(val, 18);
   const priceBig = await getPrice();
+  console.log("DEBUG - Raw tier price from contract:", priceBig.toString());
   const tokensBig = (ethAmountBig * 10n ** 18n) / priceBig;
+  console.log("DEBUG - Calculated tokens:", tokensBig.toString());
   document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
 }
 
