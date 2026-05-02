@@ -1,5 +1,5 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-const FACTORY = "0x9c6CF08f7F5D278508A939091933D7fE85557a95";
+const FACTORY = "0x1a8344bb318c99bFe8C1e7f823F1068aE6F8aeB8";
 const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
