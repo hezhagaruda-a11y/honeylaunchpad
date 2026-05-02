@@ -1,8 +1,6 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-
-const FACTORY = "0x0388C62Ad1d354d9cb1d3533e143034B4B690102";
+const FACTORY = "0x9c6CF08f7F5D278508A939091933D7fE85557a95";
 const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
-
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
 const POOL_ABI = [
@@ -11,7 +9,6 @@ const POOL_ABI = [
   "function startTime() view returns (uint256)",
   "function purchased(address) view returns (uint256)"
 ];
-
 const PROJECTS = {
   "0x81eb4d4279027a8b79b017c8d0c7e7d752511a0b": {
     name: "EEE Launch #1",
@@ -38,15 +35,12 @@ const PROJECTS = {
     banner: "https://picsum.photos/id/133/700/180"
   }
 };
-
 const connectBtn = document.getElementById("connectBtn");
 const walletEl = document.getElementById("wallet");
 const tierEl = document.getElementById("tier");
 const poolsEl = document.getElementById("pools");
 const purchasesEl = document.getElementById("purchases");
-
 let signer, provider, userTier = 0, userAddress;
-
 const themeToggle = document.getElementById("themeToggle");
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
@@ -60,7 +54,6 @@ themeToggle.onclick = () => {
   const newTheme = current === "dark" ? "light" : "dark";
   setTheme(newTheme);
 };
-
 connectBtn.onclick = async () => {
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
@@ -78,7 +71,6 @@ connectBtn.onclick = async () => {
     tierEl.innerText = "Error — check console";
   }
 };
-
 async function loadPools() {
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);
   const pools = await factory.getAllPools();
@@ -98,7 +90,7 @@ async function loadPools() {
           <div style="margin-top:8px; font-size:13px; color:#666; word-break:break-all;">${addr}</div>
           <div style="margin-top:4px; font-size:12px; color:#888;">IDO Launch Pool Address</div>
           <div style="margin-top:16px;">
-            ${hasNFT 
+            ${hasNFT
               ? `<button onclick="window.location.href='ido.html?pool=${addr}'" style="width:100%; padding:14px;">Enter ${meta.symbol} IDO</button>`
               : `<button style="background:#aaa; width:100%; padding:14px; margin-bottom:8px;">Investor NFT Required</button>
                  <button onclick="window.location.href='acquire-nft.html'" style="background:#4caf50; width:100%; padding:14px;">Acquire Investor NFT</button>`}
@@ -109,7 +101,6 @@ async function loadPools() {
     poolsEl.appendChild(div);
   });
 }
-
 async function loadMyAcquisitions() {
   if (!purchasesEl) return;
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);

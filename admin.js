@@ -1,9 +1,8 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-
-const FACTORY = "0x0388C62Ad1d354d9cb1d3533e143034B4B690102";
+const FACTORY = "0x9c6CF08f7F5D278508A939091933D7fE85557a95";
 const NFT = "0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA";
 const USDC = "0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93";
-
+const SPARK_POOL = "0x288728f3d24F9CC63771eB463f1D144d24C493F0";
 const FACTORY_ABI = [
   "function getAllPools() view returns (address[])",
   "function launchIDO(address _saleToken, address _treasury, uint256 _startTime, uint256 _endTime, uint256 _totalSupplyForSale)"
@@ -18,26 +17,97 @@ const POOL_ABI = [
   "function PRICE_GOLD() view returns (uint256)"
 ];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
-
-let signer, provider;
-
-const PROJECTS = {
-  "0x81eb4d4279027a8b79b017c8d0c7e7d752511a0b": { name: "EEE Launch #1", symbol: "EEE" },
-  "0x0857de57bdbf43fcc3df67f9a4076beb97f1c79b": { name: "DDD Launch #4", symbol: "DDD" },
-  "0xfdefcb25bbf1525c067a3033b68011efff0e63e2": { name: "DDD Launch #3", symbol: "DDD" },
-  "0x1372b8dd99c74b6fbfee15dbe11affde6008e473": { name: "DDD Launch #2", symbol: "DDD" }
-};
-
-async function connectWallet() {
-  provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-  const addr = await signer.getAddress();
-  document.getElementById("adminWallet").innerText = addr;
-  document.getElementById("walletInfo").style.display = "block";
-  document.getElementById("treasury").value = addr;
-  await refreshAll();
+const PAIR_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
+let signer, provider, userAddress = null;
+// Authorized wallets - your wallet is the first authorized one
+let authorizedWallets = JSON.parse(localStorage.getItem("hiveAuthorizedWallets") || "[]");
+if (authorizedWallets.length === 0) {
+  authorizedWallets = ["0x7EE4fe6dc352f830D7F57E2E99CaB462c05D5882"];
+  localStorage.setItem("hiveAuthorizedWallets", JSON.stringify(authorizedWallets));
 }
-
+console.log("🚀 Hive Control Dashboard loaded - Wallet gated access active");
+console.log("Authorized wallets:", authorizedWallets);
+async function connectWallet() {
+  console.log("🔌 Connect Wallet button clicked");
+  try {
+    if (!window.ethereum) {
+      alert("MetaMask not detected.\n\nPlease open this page inside the MetaMask browser.");
+      return;
+    }
+    provider = new ethers.BrowserProvider(window.ethereum);
+    // Explicit Sepolia network check
+    const network = await provider.getNetwork();
+    if (network.chainId !== 11155111n) {
+      alert("Please switch to Sepolia network in MetaMask and try again.");
+      return;
+    }
+    signer = await provider.getSigner();
+    userAddress = await signer.getAddress();
+    console.log("✅ Connected wallet:", userAddress);
+    console.log("Network confirmed: Sepolia");
+    document.getElementById("adminWallet").innerText = userAddress;
+    document.getElementById("walletInfo").style.display = "block";
+    const normalizedConnected = userAddress.toLowerCase();
+    const isAuthorized = authorizedWallets.some(addr => addr.toLowerCase() === normalizedConnected);
+    console.log("Authorization check:", isAuthorized ? "✅ Authorized" : "❌ Not authorized");
+    if (!isAuthorized) {
+      document.getElementById("unauthorizedMessage").style.display = "block";
+      document.getElementById("mainContent").style.display = "none";
+      return;
+    }
+    document.getElementById("unauthorizedMessage").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+    document.getElementById("treasury").value = userAddress;
+    await refreshAll();
+    renderAuthorizedList();
+    document.getElementById("refreshBtn").onclick = refreshAll;
+  } catch (e) {
+    console.error("Wallet connection failed:", e);
+    alert("Wallet connection failed.\n\nMake sure you are on Sepolia network and try again.");
+  }
+}
+function renderAuthorizedList() {
+  const container = document.getElementById("authorizedList");
+  container.innerHTML = "";
+  authorizedWallets.forEach((wallet, index) => {
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.justifyContent = "space-between";
+    div.style.alignItems = "center";
+    div.style.padding = "16px 0";
+    div.style.borderBottom = "1px solid #ddd";
+    div.innerHTML = `
+      <span style="font-family:monospace; font-size:15px;">${wallet.substring(0,8)}...${wallet.substring(36)}</span>
+      <button onclick="removeAuthorizedWallet(${index})" style="background:#f44336; padding:8px 16px; font-size:13px;">Remove</button>
+    `;
+    container.appendChild(div);
+  });
+}
+window.addAuthorizedWallet = function addAuthorizedWallet() {
+  const input = document.getElementById("newWalletInput");
+  const newWallet = input.value.trim();
+  if (!newWallet || !newWallet.startsWith("0x") || newWallet.length !== 42) {
+    alert("Please enter a valid wallet address (0x...)");
+    return;
+  }
+  const normalized = newWallet.toLowerCase();
+  if (authorizedWallets.some(addr => addr.toLowerCase() === normalized)) {
+    alert("Wallet already authorized");
+    return;
+  }
+  authorizedWallets.push(newWallet);
+  localStorage.setItem("hiveAuthorizedWallets", JSON.stringify(authorizedWallets));
+  renderAuthorizedList();
+  input.value = "";
+  alert("Wallet added to authorized list");
+};
+window.removeAuthorizedWallet = function removeAuthorizedWallet(index) {
+  if (confirm("Remove this wallet from authorized list?")) {
+    authorizedWallets.splice(index, 1);
+    localStorage.setItem("hiveAuthorizedWallets", JSON.stringify(authorizedWallets));
+    renderAuthorizedList();
+  }
+};
 async function launchNewPool() {
   if (!signer) return alert("Connect wallet first");
   const saleToken = document.getElementById("saleToken").value;
@@ -45,9 +115,7 @@ async function launchNewPool() {
   let start = parseInt(document.getElementById("startTime").value) || Math.floor(Date.now() / 1000) + 300;
   let end = parseInt(document.getElementById("endTime").value) || start + 86400;
   const total = document.getElementById("totalSupply").value;
-
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, signer);
-
   try {
     const tx = await factory.launchIDO(saleToken, treasury, start, end, total);
     alert("Launching pool... Tx: " + tx.hash);
@@ -59,102 +127,30 @@ async function launchNewPool() {
     alert("Launch failed: " + (e.reason || e.message));
   }
 }
-
 async function refreshAll() {
+  console.log("🔄 Refresh button clicked - refreshing all sections");
   try {
     const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);
     const pools = await factory.getAllPools();
-
-    // Quick Stats - Total USDC Raised = balance of connected wallet (treasury)
     let totalUSDC = 0n;
-    if (signer) {
+    for (const poolAddr of pools) {
       const usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
-      totalUSDC = await usdc.balanceOf(await signer.getAddress());
+      const poolUSDC = await usdc.balanceOf(poolAddr).catch(() => 0n);
+      totalUSDC += poolUSDC;
     }
-
-    document.getElementById("quickStats").innerHTML = `
-      <p><strong>Total Pools:</strong> ${pools.length}</p>
-      <p><strong>Total NFTs Minted:</strong> <span id="totalNFTs">Loading...</span></p>
-      <p><strong>Total USDC Raised:</strong> ${Number(ethers.formatUnits(totalUSDC, 6)).toLocaleString()} USDC</p>
-    `;
-
-    // Pools Table
-    const tbody = document.querySelector("#poolsTable tbody");
-    tbody.innerHTML = "";
-
-    for (const addr of pools) {
-      let name = "New Pool";
-      let symbol = "TOK";
-      let startTimeStr = "N/A";
-      let endTimeStr = "N/A";
-      let soldStr = "0 TOK";
-      let remainingStr = "0 TOK";
-      let percentStr = "0%";
-      let raisedUSDCStr = "0 USDC";
-
-      try {
-        const meta = PROJECTS[addr.toLowerCase()] || { name: "New Pool", symbol: "TOK" };
-        name = meta.name;
-        symbol = meta.symbol || "TOK";
-
-        const pool = new ethers.Contract(addr, POOL_ABI, provider);
-
-        const sold = await pool.totalSold().catch(() => 0n);
-        const total = await pool.totalSupplyForSale().catch(() => 0n);
-        const startTime = await pool.startTime().catch(() => 0);
-        const endTime = await pool.endTime().catch(() => 0);
-
-        const soldNum = parseFloat(ethers.formatUnits(sold, 18)) || 0;
-        const totalNum = parseFloat(ethers.formatUnits(total, 18)) || 0;
-        const percent = totalNum > 0 ? ((soldNum / totalNum) * 100).toFixed(2) : "0";
-
-        // USDC Raised = totalSold * PRICE_GOLD (accurate value raised)
-        let raisedUSDC = 0n;
-        try {
-          const priceGold = await pool.PRICE_GOLD();
-          raisedUSDC = (sold * priceGold) / (10n ** 30n);
-        } catch (e) {
-          // fallback to treasury balance if price call fails
-          const usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
-          raisedUSDC = await usdc.balanceOf(addr).catch(() => 0n);
-        }
-
-        soldStr = soldNum.toLocaleString() + " " + symbol;
-        remainingStr = (totalNum - soldNum).toLocaleString() + " " + symbol;
-        percentStr = percent + "%";
-        raisedUSDCStr = Number(ethers.formatUnits(raisedUSDC, 6)).toLocaleString() + " USDC";
-
-        startTimeStr = startTime > 0 ? new Date(startTime * 1000).toLocaleString() : "N/A";
-        endTimeStr = endTime > 0 ? new Date(endTime * 1000).toLocaleString() : "N/A";
-
-      } catch (e) {
-        console.error("Error loading pool", addr, e);
-      }
-
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${name}</td>
-        <td style="font-size:11px;">${addr}</td>
-        <td>${startTimeStr}</td>
-        <td>${endTimeStr}</td>
-        <td>${soldStr}</td>
-        <td>${remainingStr}</td>
-        <td>${percentStr}</td>
-        <td>${raisedUSDCStr}</td>
-      `;
-      tbody.appendChild(row);
-    }
-
-    // NFT Stats
     const nftContract = new ethers.Contract(NFT, NFT_ABI, provider);
     const totalNFTs = await nftContract.totalSupply();
-    document.getElementById("totalNFTs").innerText = totalNFTs;
-
+    document.getElementById("quickStats").innerHTML = `
+      <p><strong>Total Pools:</strong> ${pools.length}</p>
+      <p><strong>Total NFTs Minted:</strong> ${totalNFTs}</p>
+      <p><strong>Total USDC Raised:</strong> ${Number(ethers.formatUnits(totalUSDC, 6)).toLocaleString()} USDC</p>
+    `;
   } catch (e) {
     console.error("Refresh failed", e);
   }
 }
-
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("launchBtn").onclick = launchNewPool;
 document.getElementById("refreshBtn").onclick = refreshAll;
+console.log("🚀 Hive Control Dashboard loaded - Wallet gated access active");
+console.log("Authorized wallets:", authorizedWallets);
