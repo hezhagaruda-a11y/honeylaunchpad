@@ -153,11 +153,11 @@ async function updateQuote() {
     document.getElementById("quote").innerText = "You receive: 0 " + meta.symbol;
     return;
   }
-  const ethAmountBig = ethers.parseUnits(val, 18);
-  const usdcEquivalentBig = ethAmountBig * BigInt(MOCK_ETH_PRICE_USDC) * 10n ** 6n;
-  const priceBig = await getPrice();
-  const tokensBig = (usdcEquivalentBig * 10n ** 18n) / priceBig;
-  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  const ethAmount = parseFloat(val);
+  const usdcEquivalent = ethAmount * MOCK_ETH_PRICE_USDC;
+  const price = await getPrice();
+  const tokens = (usdcEquivalent * 1e6 * 1e18) / Number(price);
+  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokens, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
 }
 
 document.getElementById("ethInput").oninput = updateQuote;
@@ -173,8 +173,8 @@ document.getElementById("maxBtn").onclick = async () => {
 };
 document.getElementById("minBtn").onclick = () => {
   if (tier === 0) return;
-  const minETHBig = BigInt(MIN_AMOUNT_USD[tier]) * 10n ** 18n / BigInt(MOCK_ETH_PRICE_USDC);
-  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(minETHBig, 18)).toFixed(4);
+  const minETH = Number(ethers.formatUnits(MIN_AMOUNT_USD[tier] * 1e18 / MOCK_ETH_PRICE_USDC, 18));
+  document.getElementById("ethInput").value = minETH.toFixed(4);
   updateQuote();
 };
 document.getElementById("buyBtn").onclick = async () => {
