@@ -157,7 +157,7 @@ async function updateQuote() {
   const usdcEquivalent = ethAmount * MOCK_ETH_PRICE_USDC;
   const price = await getPrice();
   const tokens = (usdcEquivalent * 1e6 * 1e18) / Number(price);
-  document.getElementById("quote").innerText = "You receive: " + tokens.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokens, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
 }
 
 document.getElementById("ethInput").oninput = updateQuote;
