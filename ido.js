@@ -18,6 +18,7 @@ const IDO_ABI = [
 ];
 
 const PROJECTS = {
+  "0x144b16aa20f5f3cddbbd3a3c9a89e53854435368": { name: "HONEY Launch", symbol: "HONEY" },   // ← Your new pool
   "0x81eb4d4279027a8b79b017c8d0c7e7d752511a0b": { name: "EEE Launch #1", symbol: "EEE" },
   "0x0857de57bdbf43fcc3df67f9a4076beb97f1c79b": { name: "DDD Launch #4", symbol: "DDD" },
   "0xfdefcb25bbf1525c067a3033b68011efff0e63e2": { name: "DDD Launch #3", symbol: "DDD" },
@@ -37,11 +38,10 @@ document.getElementById("buyBtn").innerText = `Buy ${meta.symbol} Tokens`;
 
 let signer, user, tier = 0, ethBal = 0n, purchased = 0n, ido, startTime;
 
-// No more 6-decimal logic — everything is 18 decimals now
 const MIN_AMOUNT_ETH = {
-  1: ethers.parseUnits("0.1", 18),   // Bronze minimum
-  2: ethers.parseUnits("0.3", 18),   // Silver minimum
-  3: ethers.parseUnits("1.5", 18)    // Gold minimum
+  1: ethers.parseUnits("0.1", 18),   // Bronze
+  2: ethers.parseUnits("0.3", 18),   // Silver
+  3: ethers.parseUnits("1.5", 18)    // Gold
 };
 
 // ====================== DARK MODE ======================
@@ -111,7 +111,7 @@ async function refreshAll() {
 
   const cap = await ido.MAX_PER_WALLET();
   const price = await getPrice();
-  const capETH = Number(ethers.formatUnits(cap * price / (10n ** 36n), 18)); // 18 + 18 decimals
+  const capETH = Number(ethers.formatUnits(cap * price / (10n ** 36n), 18));
   document.getElementById("allocation").innerText = Number(ethers.formatUnits(cap, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol + " (~" + capETH.toFixed(2) + " ETH)";
 
   document.getElementById("purchaseHistory").innerHTML = `
