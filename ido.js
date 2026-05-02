@@ -37,13 +37,11 @@ document.getElementById("buyBtn").innerText = `Buy ${meta.symbol} Tokens`;
 
 let signer, user, tier = 0, ethBal = 0n, purchased = 0n, ido, startTime;
 
-// Mock ETH price in USDC for testnet (1 ETH = 2304 USDC)
-const MOCK_ETH_PRICE_USDC = 2304;
-
-const MIN_AMOUNT_USD = {
-  1: 300,   // Bronze
-  2: 1000,  // Silver
-  3: 5000   // Gold
+// No more 6-decimal logic — everything is 18 decimals now
+const MIN_AMOUNT_ETH = {
+  1: ethers.parseUnits("0.1", 18),   // Bronze minimum
+  2: ethers.parseUnits("0.3", 18),   // Silver minimum
+  3: ethers.parseUnits("1.5", 18)    // Gold minimum
 };
 
 // ====================== DARK MODE ======================
@@ -113,7 +111,7 @@ async function refreshAll() {
 
   const cap = await ido.MAX_PER_WALLET();
   const price = await getPrice();
-  const capETH = Number(ethers.formatUnits(cap * price / (10n ** 30n), 18));
+  const capETH = Number(ethers.formatUnits(cap * price / (10n ** 36n), 18)); // 18 + 18 decimals
   document.getElementById("allocation").innerText = Number(ethers.formatUnits(cap, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol + " (~" + capETH.toFixed(2) + " ETH)";
 
   document.getElementById("purchaseHistory").innerHTML = `
@@ -132,7 +130,7 @@ async function refreshPoolState() {
   const percent = totalNum > 0 ? (soldNum / totalNum) * 100 : 0;
 
   const price = await getPrice();
-  const ethRaised = Number(ethers.formatUnits(sold * price / (10n ** 30n), 18));
+  const ethRaised = Number(ethers.formatUnits(sold * price / (10n ** 36n), 18));
 
   document.getElementById("ethRaised").innerText = ethRaised.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " ETH";
   document.getElementById("sold").innerText = soldNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
@@ -154,9 +152,8 @@ async function updateQuote() {
     return;
   }
   const ethAmountBig = ethers.parseUnits(val, 18);
-  const usdcEquivalentBig = ethAmountBig * BigInt(MOCK_ETH_PRICE_USDC) * 10n ** 6n;
   const priceBig = await getPrice();
-  const tokensBig = (usdcEquivalentBig * 10n ** 18n) / priceBig;
+  const tokensBig = (ethAmountBig * 10n ** 18n) / priceBig;
   document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
 }
 
@@ -166,15 +163,14 @@ document.getElementById("maxBtn").onclick = async () => {
   const price = await getPrice();
   const cap = await ido.MAX_PER_WALLET();
   const remainingCap = cap - purchased;
-  const maxFromCap = (remainingCap * price) / (10n ** 30n);
+  const maxFromCap = (remainingCap * price) / (10n ** 36n);
   const usable = maxFromCap < ethBal ? maxFromCap : ethBal;
   document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(usable, 18)).toFixed(4);
   await updateQuote();
 };
 document.getElementById("minBtn").onclick = () => {
   if (tier === 0) return;
-  const minETHBig = BigInt(MIN_AMOUNT_USD[tier]) * 10n ** 18n / BigInt(MOCK_ETH_PRICE_USDC);
-  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(minETHBig, 18)).toFixed(4);
+  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18)).toFixed(4);
   updateQuote();
 };
 document.getElementById("buyBtn").onclick = async () => {
@@ -194,7 +190,7 @@ document.getElementById("buyBtn").onclick = async () => {
     console.error(err);
     let msg = err?.reason || err?.message || "Transaction failed";
     if (msg.includes("Below min") || msg.includes("amount too low") || msg.includes("min amount")) {
-      const minETH = Number(ethers.formatUnits(MIN_AMOUNT_USD[tier] * 1e18 / MOCK_ETH_PRICE_USDC, 18));
+      const minETH = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18));
       const tierName = tier === 3 ? "Gold" : tier === 2 ? "Silver" : "Bronze";
       msg = `Amount is below minimum for ${tierName} tier (${minETH.toFixed(4)} ETH)`;
     }
