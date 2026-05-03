@@ -29,6 +29,8 @@ const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "functi
 const PAIR_ABI = ["function swap(uint256,uint256,address,bytes)"];
 
 let signer, provider;
+let reserveMockUSDC = 0;
+let reserveHONEY = 0;
 let currentLivePrice = null;
 
 async function connectWallet() {
@@ -69,9 +71,9 @@ async function loadPoolState() {
     const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
     const [reserve0, reserve1] = await pool.getReserves();
 
-    const mockusdcReserve = Number(reserve0) / 1e18;
-    const honeyReserve = Number(reserve1) / 1e18;
-    currentLivePrice = mockusdcReserve / honeyReserve;
+    reserveMockUSDC = Number(reserve0) / 1e18;
+    reserveHONEY = Number(reserve1) / 1e18;
+    currentLivePrice = reserveMockUSDC / reserveHONEY;
 
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
     document.getElementById("honeyPriceDisplay").innerHTML = `
@@ -80,21 +82,23 @@ async function loadPoolState() {
 
     document.getElementById("poolState").innerHTML = `
       Pool Reserves:<br>
-      • MockUSDC: <strong>${mockusdcReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong><br>
-      • HONEY: <strong>${honeyReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+      • MockUSDC: <strong>${reserveMockUSDC.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong><br>
+      • HONEY: <strong>${reserveHONEY.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
     `;
 
     updateQuote();
   } catch (e) {
     console.warn("Pool state fetch failed — using demo data", e);
-    currentLivePrice = 0.004;
+    reserveMockUSDC = 300;
+    reserveHONEY = 7500000;
+    currentLivePrice = 0.00004;
     document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>0.004 MockUSDC</strong>
+      Live Honey Price: <strong>0.00004 MockUSDC</strong>
     `;
     document.getElementById("poolState").innerHTML = `
       Pool Reserves:<br>
       • MockUSDC: <strong>300.00</strong><br>
-      • HONEY: <strong>75,000.00</strong>
+      • HONEY: <strong>7,500,000.00</strong>
     `;
     updateQuote();
   }
@@ -104,11 +108,15 @@ function updateQuote() {
   const input = document.getElementById('swapAmount');
   const receiveDisplay = document.getElementById('quote');
   const mockusdcAmount = parseFloat(input.value) || 0;
+
   if (!currentLivePrice || mockusdcAmount <= 0) {
     receiveDisplay.innerHTML = `You will receive: <strong>— HONEY</strong>`;
     return;
   }
-  const honeyAmount = mockusdcAmount / currentLivePrice;
+
+  // Proper constant-product AMM quote calculation
+  const honeyAmount = (reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount);
+
   receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong>`;
 }
 
@@ -136,7 +144,7 @@ window.performSwap = async () => {
     const pool = new ethers.Contract(SPARK_POOL, PAIR_ABI, signer);
 
     const mockusdcToSwap = ethers.parseUnits(mockusdcAmount.toString(), 18);
-    const honeyOutMin = ethers.parseUnits((mockusdcAmount / currentLivePrice * 0.97).toString(), 18);
+    const honeyOutMin = ethers.parseUnits(((reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount) * 0.97).toString(), 18);
 
     const allowance = await mockusdc.allowance(await signer.getAddress(), SPARK_POOL);
     if (allowance < mockusdcToSwap) {
@@ -147,7 +155,7 @@ window.performSwap = async () => {
     const tx = await pool.swap(0, honeyOutMin, await signer.getAddress(), "0x");
     await tx.wait();
 
-    const honeyReceived = mockusdcAmount / currentLivePrice;
+    const honeyReceived = (reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount);
     statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${honeyReceived.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
 
     await updateBalances();
