@@ -17,13 +17,12 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   MockUSDC is the payment token for Spark DEX.
   MockETH remains reserved for IDO launch pools only.
 
-  Robust fallback added for pool state in case the new pool contract 
-  does not expose getReserves() in the expected format.
+  New Spark DEX pool deployed: 0x990704f7cF10BA2A080BCa453Ae68B3f9Ca8edD0
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";   // Payment token for Spark DEX
-const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
+const SPARK_POOL = "0x990704f7cF10BA2A080BCa453Ae68B3f9Ca8edD0"; // New deployed pool address
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];
@@ -87,10 +86,10 @@ async function loadPoolState() {
 
     updateQuote();
   } catch (e) {
-    console.warn("Pool state fetch failed (contract may not expose getReserves) — using demo data", e);
-    currentLivePrice = 0.00484;
+    console.warn("Pool state fetch failed — using demo data", e);
+    currentLivePrice = 0.004;
     document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>0.00484 MockUSDC</strong>
+      Live Honey Price: <strong>0.004 MockUSDC</strong>
     `;
     document.getElementById("poolState").innerHTML = `
       Pool Reserves:<br>
