@@ -83,13 +83,28 @@ async function loadLiveHoneyPrice() {
     const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
     const [reserve0, reserve1] = await pool.getReserves();
 
-    const usdcReserve = Number(reserve0) / 1e6;   // USDC has 6 decimals
-    const honeyReserve = Number(reserve1) / 1e18; // HONEY has 18 decimals
+    const reserve0Num = Number(reserve0);
+    const reserve1Num = Number(reserve1);
 
-    // Robust price calculation - protect against division by zero
-    currentLivePrice = honeyReserve > 0 ? usdcReserve / honeyReserve : 0.004;
+    // Robust price calculation - try both possible orders
+    let usdcReserve, honeyReserve;
 
-    // Clean decimal display (no trailing zeros)
+    // Assume reserve0 is USDC (6 decimals), reserve1 is HONEY (18 decimals)
+    if (reserve0Num > 0 && reserve1Num > 0) {
+      usdcReserve = reserve0Num / 1e6;
+      honeyReserve = reserve1Num / 1e18;
+      currentLivePrice = usdcReserve / honeyReserve;
+    } 
+    // Or reserve0 is HONEY, reserve1 is USDC
+    else if (reserve1Num > 0) {
+      usdcReserve = reserve1Num / 1e6;
+      honeyReserve = reserve0Num / 1e18;
+      currentLivePrice = usdcReserve / honeyReserve;
+    } else {
+      currentLivePrice = 0.004; // safe fallback
+    }
+
+    // Clean decimal display
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
     if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
 
