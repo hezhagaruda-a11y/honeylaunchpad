@@ -21,8 +21,8 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
-const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";   // Payment token for Spark DEX
-const SPARK_POOL = "0x990704f7cF10BA2A080BCa453Ae68B3f9Ca8edD0"; // New deployed pool address
+const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
+const SPARK_POOL = "0x990704f7cF10BA2A080BCa453Ae68B3f9Ca8edD0";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];
@@ -108,15 +108,11 @@ function updateQuote() {
   const input = document.getElementById('swapAmount');
   const receiveDisplay = document.getElementById('quote');
   const mockusdcAmount = parseFloat(input.value) || 0;
-
   if (!currentLivePrice || mockusdcAmount <= 0) {
     receiveDisplay.innerHTML = `You will receive: <strong>— HONEY</strong>`;
     return;
   }
-
-  // Proper constant-product AMM quote calculation
   const honeyAmount = (reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount);
-
   receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong>`;
 }
 
@@ -144,7 +140,10 @@ window.performSwap = async () => {
     const pool = new ethers.Contract(SPARK_POOL, PAIR_ABI, signer);
 
     const mockusdcToSwap = ethers.parseUnits(mockusdcAmount.toString(), 18);
-    const honeyOutMin = ethers.parseUnits(((reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount) * 0.97).toString(), 18);
+
+    // 0.5% slippage for more accurate received amount
+    const expectedHoney = (reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount);
+    const honeyOutMin = ethers.parseUnits((expectedHoney * 0.995).toString(), 18);
 
     const allowance = await mockusdc.allowance(await signer.getAddress(), SPARK_POOL);
     if (allowance < mockusdcToSwap) {
@@ -156,13 +155,25 @@ window.performSwap = async () => {
     await tx.wait();
 
     const honeyReceived = (reserveHONEY * mockusdcAmount) / (reserveMockUSDC + mockusdcAmount);
-    statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${honeyReceived.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
+
+    statusEl.innerHTML = `
+      <span style="color:#4caf50; font-size:1.1em; line-height:1.6; display:block; padding:12px; background:#e8f5e9; border-radius:8px; margin-top:12px;">
+        🎉 Congratulations!<br>
+        You have successfully swapped MockUSDC for HONEY!<br><br>
+        This is your key to <strong>generational wealth fuel</strong> and priority access 
+        in the Honey ecosystem.
+      </span>
+    `;
 
     await updateBalances();
     await loadPoolState();
   } catch (e) {
     console.error(e);
-    statusEl.innerHTML = `<span style="color:red">❌ Swap failed. Check console for details.</span>`;
+    if (e.message.includes("TRANSFER_FAILED")) {
+      statusEl.innerHTML = `<span style="color:red">❌ TRANSFER_FAILED<br>The pool contract does not have enough HONEY tokens.<br>Please send 7,500,000 HONEY to the pool address.</span>`;
+    } else {
+      statusEl.innerHTML = `<span style="color:red">❌ Swap failed. Check console for details.</span>`;
+    }
   }
 };
 
