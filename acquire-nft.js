@@ -14,6 +14,8 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
    It is the spark that ignites generational wealth mechanics.
 
    All addresses are now the final approved Clean Slate State (May 03, 2026).
+   Pure 18-decimal math everywhere – MockUSDC (18 decimals) and HONEY (18 decimals).
+   No MockETH is used on this page. No legacy 6-decimal code remains.
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
@@ -83,28 +85,24 @@ async function loadLiveHoneyPrice() {
     const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
     const [reserve0, reserve1] = await pool.getReserves();
 
-    const reserve0Num = Number(reserve0);
-    const reserve1Num = Number(reserve1);
+    const r0 = Number(reserve0) / 1e18;
+    const r1 = Number(reserve1) / 1e18;
 
-    // Robust price calculation - try both possible orders
-    let usdcReserve, honeyReserve;
+    // Pure 18-decimal math – both MockUSDC and HONEY use 18 decimals
+    let price;
 
-    // Assume reserve0 is USDC (6 decimals), reserve1 is HONEY (18 decimals)
-    if (reserve0Num > 0 && reserve1Num > 0) {
-      usdcReserve = reserve0Num / 1e6;
-      honeyReserve = reserve1Num / 1e18;
-      currentLivePrice = usdcReserve / honeyReserve;
-    } 
-    // Or reserve0 is HONEY, reserve1 is USDC
-    else if (reserve1Num > 0) {
-      usdcReserve = reserve1Num / 1e6;
-      honeyReserve = reserve0Num / 1e18;
-      currentLivePrice = usdcReserve / honeyReserve;
+    if (r0 > 0 && r1 > 0) {
+      // Try both possible reserve orders and choose the sensible price
+      const p1 = r0 / r1;
+      const p2 = r1 / r0;
+      price = Math.min(p1, p2);   // The smaller value is the price of HONEY in MockUSDC
     } else {
-      currentLivePrice = 0.004; // safe fallback
+      price = 0.00004; // reasonable fallback for empty or new pool
     }
 
-    // Clean decimal display
+    currentLivePrice = price;
+
+    // Clean decimal display – no trailing zeros
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
     if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
 
@@ -123,7 +121,7 @@ async function loadLiveHoneyPrice() {
     });
   } catch (e) {
     console.error("Live price fetch failed", e);
-    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.004 USDC</strong> (Simulated Spark DEX Pool)`;
+    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00004 USDC</strong> (Simulated Spark DEX Pool)`;
   }
 }
 
@@ -238,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById("connectBtn").onclick = connectWallet;
 
-  // Load history from localStorage
   const saved = localStorage.getItem("acquisitionsHistory");
   if (saved) acquisitionsHistory = JSON.parse(saved);
 
