@@ -1,5 +1,22 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
+/* 
+   ===================================================================
+   ACQUIRE INVESTOR NFT – THE THRESHOLD PAGE (Clean Slate Version)
+   ===================================================================
+
+   This is the heart of the Honey Launchpad protocol.
+
+   Here, a player connects their wallet, sees the live Honey price from the Spark DEX, 
+   chooses their tier, and mints their Investor NFT.
+
+   This single action is the moment they step from observer to participant in the honeycomb lattice.
+   It is the spark that ignites generational wealth mechanics.
+
+   Every line of code here was written with reverence for that moment.
+   All addresses are now updated to the final approved Clean Slate State (May 03, 2026).
+*/
+
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
@@ -8,18 +25,12 @@ const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function approve(address,uint256)", "function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)"];
-const NFT_ABI = [
-  "function mintBronze()",
-  "function mintSilver()",
-  "function mintGold()",
-  "function getUserTier(address) view returns (uint256)",
-  "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
-];
+const NFT_ABI = ["function mintBronze()", "function mintSilver()", "function mintGold()", "function getUserTier(address) view returns (uint256)"];
 
 let signer, provider;
 let currentLivePrice = null;
 
-// Combined history: on-chain past mints + new mints in this session
+// History of acquisitions (historical + new mints in this session)
 let acquisitionsHistory = [];
 
 async function connectWallet() {
@@ -140,7 +151,6 @@ window.mintTier = async (tier) => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
 
-    // Add new mint to history
     acquisitionsHistory.unshift({
       time: timeStr,
       tier: tierName,
