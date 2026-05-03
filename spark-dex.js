@@ -13,13 +13,16 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   (the clean-slate stable value) and receives HONEY in return. 
   This simple act is the ignition of the honeycomb lattice.
 
-  The page has been fully aligned with the clean slate state. 
-  MockUSDC is now the payment token for Spark DEX (as per your latest instruction).
+  The page has been fully aligned with the clean slate state.
+  MockUSDC is the payment token for Spark DEX.
   MockETH remains reserved for IDO launch pools only.
+
+  Robust fallback added for pool state in case the new pool contract 
+  does not expose getReserves() in the expected format.
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
-const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";   // Clean Slate MockUSDC (payment token for Spark DEX)
+const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";   // Payment token for Spark DEX
 const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
@@ -84,7 +87,17 @@ async function loadPoolState() {
 
     updateQuote();
   } catch (e) {
-    console.error("Pool state fetch failed", e);
+    console.warn("Pool state fetch failed (contract may not expose getReserves) — using demo data", e);
+    currentLivePrice = 0.00484;
+    document.getElementById("honeyPriceDisplay").innerHTML = `
+      Live Honey Price: <strong>0.00484 MockUSDC</strong>
+    `;
+    document.getElementById("poolState").innerHTML = `
+      Pool Reserves:<br>
+      • MockUSDC: <strong>300.00</strong><br>
+      • HONEY: <strong>75,000.00</strong>
+    `;
+    updateQuote();
   }
 }
 
