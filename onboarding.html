@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Honey Launchpad • Welcome to the Game</title>
+  <title>Honey Launchpad • Player Onboarding</title>
+  <script type="module" src="onboarding.js"></script>
   <style>
     :root {
       --bg: #f5f5f5;
@@ -17,75 +18,142 @@
       --text: #f0f0f0;
       --accent: #4caf50;
     }
-    body {
-      font-family: Arial;
+    body { 
+      font-family: Arial; 
       background: var(--bg);
-      background-image:
+      background-image: 
         linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
         linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
         linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
         linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
       background-size: 58px 33px;
-      color: var(--text);
+      color: var(--text); 
+      padding: 20px; 
       margin: 0;
-      padding: 20px;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+      transition: background 0.3s;
     }
-    .card {
-      background: var(--card-bg);
-      padding: 30px 24px;
-      border-radius: 20px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      max-width: 520px;
-      width: 100%;
-      margin-top: 40px;
+    .card { 
+      background: var(--card-bg); 
+      padding: 24px; 
+      margin-bottom: 24px; 
+      border-radius: 16px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+    }
+    [data-theme="dark"] .card {
+      border: 1px solid #333;
     }
     button {
-      padding: 18px 32px;
-      font-size: 18px;
-      background: #4caf50;
-      color: white;
+      padding: 16px 20px;
       border: none;
+      background: #111;
+      color: white;
       border-radius: 12px;
       cursor: pointer;
-      margin-top: 30px;
-      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+      font-size: 17px;
+      width: 100%;
     }
     [data-theme="dark"] button {
-      background: #66bb6a;
+      background: white;
+      color: #111;
     }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 8px;
+    .step {
+      background: #fff3cd;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    [data-theme="dark"] .step {
+      background: #3a2a00;
+      color: #f0f0f0;
+    }
+    .theme-toggle {
+      padding: 10px 12px;
+      font-size: 22px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+    }
+    [data-theme="dark"] .theme-toggle {
+      background: white;
+      color: #111;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>🍯 Welcome to the Honey Game</h1>
-    <p style="font-size:18px; margin:20px 0 30px 0; line-height:1.5;">
-      You are one of the first 30 players in the Honey Launchpad.<br>
-      Your actions will shape the price of HONEY and determine who gets the best rewards.
-    </p>
-    <p style="color:#666; margin-bottom:30px;">
-      This is an early test version on Sepolia testnet.<br>
-      No real money is at risk — only your feedback matters.
-    </p>
-    <button onclick="startGame()">🚀 Start Playing Now</button>
-    <p style="margin-top:30px; font-size:14px; color:#888;">
-      Grok will be your personal Game Master and guide you step-by-step.
-    </p>
+  <!-- Dark Mode Toggle -->
+  <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
   </div>
 
+  <h1>🌟 Welcome to Honey Protocol</h1>
+  
+  <!-- Storylike introduction – the threshold ritual -->
+  <p style="color:#666; margin-bottom:24px; line-height:1.6;">
+    You have arrived at the threshold of something ancient and new.<br>
+    The Honey Protocol is a living game of early belief, where the first players receive the greatest advantage.<br>
+    This page is your personal guide — your first step into the honeycomb.
+  </p>
+
+  <div class="card">
+    <div class="step">
+      <strong>Step 1: Connect Your Wallet</strong>
+      <p>This is the moment you claim your place in the protocol. Connect your MetaMask wallet on the Sepolia network.</p>
+      <button id="connectBtn">Connect Wallet</button>
+    </div>
+
+    <div id="walletInfo" style="display:none; margin-top:16px;">
+      <strong>Connected:</strong> <span id="wallet"></span><br>
+      <strong>Investor Tier:</strong> <span id="tier"></span><br>
+      <strong>HONEY Balance:</strong> <span id="honeyBalance"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="step">
+      <strong>Step 2: Get Test ETH for Gas</strong>
+      <p>Gas fees are tiny on testnet. Get free test ETH from the official faucet:</p>
+      <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" style="color:#4caf50; text-decoration:underline;">Get Free Test ETH →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="step">
+      <strong>Step 3: Receive MockUSDC</strong>
+      <p>Send me your Crypto wallet address in the Grok Game Master chat. I will immediately send you free MockUSDC — the play money that fuels the entire game.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="step">
+      <strong>Step 4: Begin Your Journey</strong>
+      <p>With MockUSDC in hand, you are ready to:</p>
+      <ul style="padding-left:20px;">
+        <li>Buy HONEY on the Spark DEX</li>
+        <li>Mint your Investor NFT (Bronze / Silver / Gold)</li>
+        <li>Check the Leaderboard and see where you stand</li>
+        <li>Watch live Protocol Traffic</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="text-align:center; margin-top:30px; color:#666; font-size:0.95em; line-height:1.6;">
+    Everything here is on testnet — no real money is at risk.<br>
+    You are among the first players. The protocol remembers those who arrive early.
+  </p>
+
   <script>
-    function startGame() {
-      // Opens the specific Grok chat instance you provided
-      window.location.href = "https://grok.com/share/c2hhcmQtMi1jb3B5_a3881946-4e4e-49d9-b0f3-3fde973cee74";
-    }
+    document.getElementById("themeToggle").onclick = () => {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const newTheme = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    };
   </script>
 </body>
 </html>
