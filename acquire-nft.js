@@ -19,7 +19,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
-const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
+const SPARK_POOL = "0x990704f7cF10BA2A080BCa453Ae68B3f9Ca8edD0";
 
 const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
 
