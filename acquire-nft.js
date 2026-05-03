@@ -13,8 +13,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
    This single action is the moment they step from observer to participant in the honeycomb lattice.
    It is the spark that ignites generational wealth mechanics.
 
-   Every line of code here was written with reverence for that moment.
-   All addresses are now updated to the final approved Clean Slate State (May 03, 2026).
+   All addresses are now the final approved Clean Slate State (May 03, 2026).
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
@@ -211,21 +210,19 @@ window.refreshAcquisitions = function refreshAcquisitions() {
   renderAcquisitions();
 };
 
-document.getElementById("themeToggle").onclick = () => {
-  const current = document.documentElement.getAttribute("data-theme") || "light";
-  const newTheme = current === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", newTheme);
-  localStorage.setItem("theme", newTheme);
-};
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById("themeToggle").onclick = () => {
+    const current = document.documentElement.getAttribute("data-theme") || "light";
+    const newTheme = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
 
-document.getElementById("connectBtn").onclick = connectWallet;
+  document.getElementById("connectBtn").onclick = connectWallet;
 
-// Load history from localStorage
-function loadAcquisitionsHistory() {
+  // Load history from localStorage
   const saved = localStorage.getItem("acquisitionsHistory");
   if (saved) acquisitionsHistory = JSON.parse(saved);
-}
 
-// Initial load
-loadAcquisitionsHistory();
-loadLiveHoneyPrice();
+  loadLiveHoneyPrice();
+});

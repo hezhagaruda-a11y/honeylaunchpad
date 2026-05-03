@@ -91,4 +91,58 @@
 <body>
   <!-- Dark Mode Toggle -->
   <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
-    <button id="themeToggle" class
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+  </div>
+
+  <h2>🍯 Acquire Investor NFT</h2>
+
+  <div class="card">
+    <button id="connectBtn" style="width:100%;">Connect Wallet</button>
+    <p id="wallet" style="margin-top:10px; font-size:0.9em;"></p>
+    <p id="honeyBalance" class="balance">HONEY Balance: Loading...</p>
+    <p id="currentTier" class="balance" style="margin-top:4px; font-weight:bold; color:#4caf50;"></p>
+  </div>
+
+  <div class="card">
+    <h3>Current Honey Price (Simulated Spark DEX Pool)</h3>
+    <p id="honeyPriceDisplay">Loading live price...</p>
+    <button onclick="buyHoneyOnDex()" style="background:#4caf50; width:100%; margin-top:10px;">Buy HONEY on Spark DEX</button>
+  </div>
+
+  <div class="card">
+    <h3>Bronze Tier</h3>
+    <p id="bronzeHONEY" class="price">Loading...</p>
+    <button onclick="mintTier(1)">Mint Bronze</button>
+  </div>
+
+  <div class="card">
+    <h3>Silver Tier</h3>
+    <p id="silverHONEY" class="price">Loading...</p>
+    <button onclick="mintTier(2)">Mint Silver</button>
+  </div>
+
+  <div class="card">
+    <h3>Gold Tier</h3>
+    <p id="goldHONEY" class="price">Loading...</p>
+    <button onclick="mintTier(3)">Mint Gold</button>
+  </div>
+
+  <!-- Investor NFT Acquisitions Section -->
+  <div class="card">
+    <h3>Investor NFT Acquisitions - Latest 10</h3>
+    <table id="acquisitionsTable" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px 0; border-bottom:1px solid #ddd;">Time</th>
+          <th style="text-align:left; padding:8px 0; border-bottom:1px solid #ddd;">Tier</th>
+          <th style="text-align:right; padding:8px 0; border-bottom:1px solid #ddd;">HONEY Paid</th>
+        </tr>
+      </thead>
+      <tbody id="acquisitionsBody"></tbody>
+    </table>
+    <button onclick="refreshAcquisitions()" style="width:100%; margin-top:16px; padding:12px; background:#111; color:white; box-shadow: 0 0 12px #4caf50;">🔄 Refresh Acquisitions</button>
+  </div>
+
+  <p id="status"></p>
+</body>
+</html>
