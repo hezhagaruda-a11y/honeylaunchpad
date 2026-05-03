@@ -6,31 +6,20 @@
   <title>Honey Launchpad • Spark DEX</title>
   <script type="module" src="spark-dex.js"></script>
   <style>
-    :root {
-      --bg: #f5f5f5;
-      --card-bg: white;
-      --text: #111;
-      --accent: #4caf50;
-    }
-    [data-theme="dark"] {
-      --bg: #0f0f0f;
-      --card-bg: #1a1a1a;
-      --text: #f0f0f0;
-      --accent: #4caf50;
-    }
+    :root { --bg: #f5f5f5; --card-bg: white; --text: #111; --accent: #4caf50; }
+    [data-theme="dark"] { --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #f0f0f0; --accent: #4caf50; }
     body { 
       font-family: Arial; 
       background: var(--bg);
-      background-image: 
-        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
+      background-image: linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+                        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+                        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
+                        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
       background-size: 58px 33px;
       color: var(--text); 
       padding: 20px; 
-      max-width: 700px;
-      margin: auto;
+      max-width: 700px; 
+      margin: auto; 
       transition: background 0.3s;
     }
     .card { 
@@ -41,9 +30,7 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.08); 
       border: 1px solid #ddd;
     }
-    [data-theme="dark"] .card {
-      border: 1px solid #333;
-    }
+    [data-theme="dark"] .card { border: 1px solid #333; }
     button { 
       padding: 14px 20px; 
       border: none; 
@@ -54,10 +41,7 @@
       font-size: 16px;
       min-height: 48px;
     }
-    [data-theme="dark"] button {
-      background: white;
-      color: #111;
-    }
+    [data-theme="dark"] button { background: white; color: #111; }
     .theme-toggle {
       padding: 10px 12px;
       font-size: 22px;
@@ -71,25 +55,10 @@
       color: white;
       box-shadow: 0 0 12px #4fc3f7;
     }
-    [data-theme="dark"] .theme-toggle {
-      background: white;
-      color: #111;
-      box-shadow: 0 0 12px #4fc3f7;
-    }
-    input { 
-      width: 100%; 
-      padding: 12px; 
-      font-size: 16px; 
-      border: 1px solid #ddd; 
-      border-radius: 8px; 
-      box-sizing: border-box; 
-    }
-    .pool-state { 
-      font-size: 14.5px; 
-      color: #666; 
-      margin-top: 8px; 
-      line-height: 1.5; 
-    }
+    [data-theme="dark"] .theme-toggle { background: white; color: #111; box-shadow: 0 0 12px #4fc3f7; }
+    input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+    #quote { margin: 12px 0; font-size: 18px; font-weight: 700; min-height: 32px; color: var(--accent); }
+    .pool-state { font-size: 14.5px; color: #666; margin-top: 8px; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -104,23 +73,23 @@
   <div class="card">
     <button id="connectBtn" style="width:100%;">Connect Wallet</button>
     <p id="wallet" style="margin-top:10px; font-size:0.9em;"></p>
-    <p id="usdcBalance" class="balance">USDC Balance: Loading...</p>
+    <p id="usdcBalance" class="balance">MockUSDC Balance: Loading...</p>
     <p id="honeyBalance" class="balance">HONEY Balance: Loading...</p>
   </div>
 
   <!-- Pool State + Live Price -->
   <div class="card">
-    <h3>Current Pool State (USDC / HONEY)</h3>
+    <h3>Current Pool State (MockUSDC / HONEY)</h3>
     <p id="poolState" class="pool-state">Loading pool reserves...</p>
     <p id="honeyPriceDisplay" style="font-size:1.15em; font-weight:700; margin-top:10px;">Live Honey Price: Loading...</p>
   </div>
 
   <!-- Swap Card -->
   <div class="card">
-    <h3>Sell USDC → Buy HONEY</h3>
-    <input id="swapAmount" type="number" value="300" placeholder="Amount in USDC" style="width:100%; padding:12px; margin-bottom:10px; font-size:16px;">
+    <h3>Sell MockUSDC → Buy HONEY</h3>
+    <input id="swapAmount" type="number" value="300" placeholder="Amount in MockUSDC" style="width:100%; padding:12px; margin-bottom:10px; font-size:16px;">
     <p id="quote" style="margin:12px 0; font-size:18px; font-weight:700; min-height:32px;">You will receive: — HONEY</p>
-    <button onclick="performSwap()" style="background:#4caf50; width:100%;">Swap USDC for HONEY</button>
+    <button onclick="performSwap()" style="background:#4caf50; width:100%;">Swap MockUSDC for HONEY</button>
   </div>
 
   <p id="status" style="margin-top:15px; font-size:16px; min-height:32px;"></p>

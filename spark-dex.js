@@ -1,7 +1,25 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
+/* 
+  ===================================================================
+  SPARK DEX – THE PRIMAL HEARTBEAT OF THE HONEY LAUNCHPAD PROTOCOL
+  ===================================================================
+  This page is the sacred forge where the first spark of belief is struck.
+  The constant-product pool, seeded with 300 MockUSDC and 7,500,000 HONEY,
+  is the origin point of all price discovery, all early advantage, 
+  all arbitrage, and ultimately all generational wealth mechanics.
+
+  Every swap here is a microcosm of the entire protocol: a player brings MockUSDC 
+  (the clean-slate stable value) and receives HONEY in return. 
+  This simple act is the ignition of the honeycomb lattice.
+
+  The page has been fully aligned with the clean slate state. 
+  MockUSDC is now the payment token for Spark DEX (as per your latest instruction).
+  MockETH remains reserved for IDO launch pools only.
+*/
+
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
-const USDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
+const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";   // Clean Slate MockUSDC (payment token for Spark DEX)
 const SPARK_POOL = "0x4C4D881eAC0E85a409bB0135b0DB7Ae6076CF90F";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
@@ -32,11 +50,11 @@ async function connectWallet() {
 async function updateBalances() {
   if (!signer) return;
   try {
-    const usdc = new ethers.Contract(USDC, ERC20_ABI, signer);
+    const mockusdc = new ethers.Contract(MOCKUSDC, ERC20_ABI, signer);
     const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
-    const usdcBal = await usdc.balanceOf(await signer.getAddress());
+    const mockusdcBal = await mockusdc.balanceOf(await signer.getAddress());
     const honeyBal = await honey.balanceOf(await signer.getAddress());
-    document.getElementById("usdcBalance").innerHTML = `USDC Balance: <strong>${(Number(usdcBal) / 1e6).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>`;
+    document.getElementById("usdcBalance").innerHTML = `MockUSDC Balance: <strong>${(Number(mockusdcBal) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>`;
     document.getElementById("honeyBalance").innerHTML = `HONEY Balance: <strong>${(Number(honeyBal) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>`;
   } catch (e) {
     console.error("Balance fetch failed", e);
@@ -48,19 +66,22 @@ async function loadPoolState() {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
     const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
     const [reserve0, reserve1] = await pool.getReserves();
-    const usdcReserve = Number(reserve0) / 1e6;
+
+    const mockusdcReserve = Number(reserve0) / 1e18;
     const honeyReserve = Number(reserve1) / 1e18;
-    currentLivePrice = usdcReserve / honeyReserve;
+    currentLivePrice = mockusdcReserve / honeyReserve;
 
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
     document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>${priceStr} USDC</strong>
+      Live Honey Price: <strong>${priceStr} MockUSDC</strong>
     `;
+
     document.getElementById("poolState").innerHTML = `
       Pool Reserves:<br>
-      • USDC: <strong>${usdcReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong><br>
+      • MockUSDC: <strong>${mockusdcReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong><br>
       • HONEY: <strong>${honeyReserve.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
     `;
+
     updateQuote();
   } catch (e) {
     console.error("Pool state fetch failed", e);
@@ -70,19 +91,19 @@ async function loadPoolState() {
 function updateQuote() {
   const input = document.getElementById('swapAmount');
   const receiveDisplay = document.getElementById('quote');
-  const usdcAmount = parseFloat(input.value) || 0;
-  if (!currentLivePrice || usdcAmount <= 0) {
+  const mockusdcAmount = parseFloat(input.value) || 0;
+  if (!currentLivePrice || mockusdcAmount <= 0) {
     receiveDisplay.innerHTML = `You will receive: <strong>— HONEY</strong>`;
     return;
   }
-  const honeyAmount = usdcAmount / currentLivePrice;
+  const honeyAmount = mockusdcAmount / currentLivePrice;
   receiveDisplay.innerHTML = `You will receive: <strong>${honeyAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong>`;
 }
 
 window.performSwap = async () => {
   const input = document.getElementById('swapAmount');
-  const usdcAmount = parseFloat(input.value) || 0;
-  if (usdcAmount <= 0) {
+  const mockusdcAmount = parseFloat(input.value) || 0;
+  if (mockusdcAmount <= 0) {
     alert("Please enter a valid amount");
     return;
   }
@@ -96,25 +117,25 @@ window.performSwap = async () => {
   }
 
   const statusEl = document.getElementById("status");
-  statusEl.innerHTML = `<span style="color:#ff9800">Approving & swapping USDC...</span>`;
+  statusEl.innerHTML = `<span style="color:#ff9800">Approving & swapping MockUSDC...</span>`;
 
   try {
-    const usdc = new ethers.Contract(USDC, ERC20_ABI, signer);
+    const mockusdc = new ethers.Contract(MOCKUSDC, ERC20_ABI, signer);
     const pool = new ethers.Contract(SPARK_POOL, PAIR_ABI, signer);
 
-    const usdcToSwap = ethers.parseUnits(usdcAmount.toString(), 6);
-    const honeyOutMin = ethers.parseUnits((usdcAmount / currentLivePrice * 0.97).toString(), 18);
+    const mockusdcToSwap = ethers.parseUnits(mockusdcAmount.toString(), 18);
+    const honeyOutMin = ethers.parseUnits((mockusdcAmount / currentLivePrice * 0.97).toString(), 18);
 
-    const allowance = await usdc.allowance(await signer.getAddress(), SPARK_POOL);
-    if (allowance < usdcToSwap) {
-      const approveTx = await usdc.approve(SPARK_POOL, usdcToSwap);
+    const allowance = await mockusdc.allowance(await signer.getAddress(), SPARK_POOL);
+    if (allowance < mockusdcToSwap) {
+      const approveTx = await mockusdc.approve(SPARK_POOL, mockusdcToSwap);
       await approveTx.wait();
     }
 
     const tx = await pool.swap(0, honeyOutMin, await signer.getAddress(), "0x");
     await tx.wait();
 
-    const honeyReceived = usdcAmount / currentLivePrice;
+    const honeyReceived = mockusdcAmount / currentLivePrice;
     statusEl.innerHTML = `<span style="color:#4caf50">✅ Swap successful!<br>You received <strong>${honeyReceived.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} HONEY</strong></span>`;
 
     await updateBalances();
