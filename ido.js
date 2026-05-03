@@ -1,15 +1,26 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
+/*
+  ===================================================================
+  IDO LAUNCH POOL PAGE – THE LIVING HEART OF THE HONEYCOMB
+  ===================================================================
+  This page is where belief becomes action. 
+  A player connects their wallet, sees their tier, feels the live price of the sale token, 
+  and chooses to buy into the next sovereign hexagon.
+  
+  The page now dynamically reads the token name and symbol from the sale token contract itself.
+  No more manual PROJECTS map. No more legacy 6-decimal scaling. 
+  Pure 18-decimal math with MockETH as payment token.
+  
+  Every line here tells the story of the protocol’s evolution: from early MockUSDC struggles 
+  to a clean, self-replicating lattice where every new pool launches with perfect clarity.
+*/
+
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const MOCKETH = "0x084283482cAA832eb629a2c7674C2454A8277597";
 
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
-const ERC20_ABI = [
-  "function balanceOf(address) view returns (uint256)",
-  "function approve(address,uint256)",
-  "function name() view returns (string)",
-  "function symbol() view returns (string)"
-];
+const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function name() view returns (string)", "function symbol() view returns (string)"];
 const IDO_ABI = [
   "function buy(uint256)",
   "function purchased(address) view returns (uint256)",
@@ -74,7 +85,8 @@ document.getElementById("connect").onclick = async () => {
 };
 
 async function loadPoolMetadata() {
-  // Dynamically fetch name and symbol from the sale token contract
+  // Dynamically fetch name and symbol from the sale token contract itself.
+  // This makes every new pool automatically beautiful and self-describing.
   const saleToken = new ethers.Contract(pool, ERC20_ABI, signer || new ethers.JsonRpcProvider('https://rpc.sepolia.org'));
   try {
     const name = await saleToken.name();
@@ -110,8 +122,6 @@ function startCountdown() {
   setInterval(update, 1000);
 }
 
-// ... (the rest of the file remains the same as the previous clean version: refreshAll, refreshPoolState, getPrice, updateQuote, minBtn, maxBtn, buyBtn)
-
 async function refreshAll() {
   const mocketh = new ethers.Contract(MOCKETH, ERC20_ABI, signer);
   ethBal = await mocketh.balanceOf(user);
@@ -131,4 +141,80 @@ async function refreshAll() {
   await refreshPoolState();
 }
 
-// (The rest of the functions — refreshPoolState, getPrice, updateQuote, minBtn, maxBtn, buyBtn — remain exactly as in the previous clean version)
+async function refreshPoolState() {
+  const sold = await ido.totalSold();
+  const total = await ido.totalSupplyForSale();
+  const soldNum = parseFloat(ethers.formatUnits(sold, 18));
+  const totalNum = parseFloat(ethers.formatUnits(total, 18));
+  const remainingNum = totalNum - soldNum;
+  const percent = totalNum > 0 ? (soldNum / totalNum) * 100 : 0;
+
+  const price = await getPrice();
+  const ethRaised = Number(ethers.formatUnits(sold * price / (10n ** 36n), 18));
+
+  document.getElementById("ethRaised").innerText = ethRaised.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " ETH";
+  document.getElementById("sold").innerText = soldNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  document.getElementById("remaining").innerText = remainingNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  document.getElementById("percent").innerText = percent.toFixed(2) + "% SOLD";
+  document.getElementById("progressBar").style.width = percent + "%";
+}
+
+async function getPrice() {
+  if (tier === 3) return await ido.PRICE_GOLD();
+  if (tier === 2) return await ido.PRICE_SILVER();
+  return await ido.PRICE_BRONZE();
+}
+
+async function updateQuote() {
+  const val = document.getElementById("ethInput").value.trim();
+  if (!val || tier === 0) {
+    document.getElementById("quote").innerText = "You receive: 0 " + meta.symbol;
+    return;
+  }
+  const ethAmountBig = ethers.parseUnits(val, 18);
+  const priceBig = await getPrice();
+  const tokensBig = (ethAmountBig * 10n ** 18n) / priceBig;
+  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+}
+
+document.getElementById("ethInput").oninput = updateQuote;
+document.getElementById("maxBtn").onclick = async () => {
+  if (tier === 0) return;
+  const price = await getPrice();
+  const cap = await ido.MAX_PER_WALLET();
+  const remainingCap = cap - purchased;
+  const maxFromCap = (remainingCap * price) / (10n ** 36n);
+  const usable = maxFromCap < ethBal ? maxFromCap : ethBal;
+  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(usable, 18)).toFixed(4);
+  await updateQuote();
+};
+document.getElementById("minBtn").onclick = () => {
+  if (tier === 0) return;
+  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18)).toFixed(4);
+  updateQuote();
+};
+document.getElementById("buyBtn").onclick = async () => {
+  try {
+    if (!signer || tier === 0) { alert("You need an Investor NFT"); return; }
+    const val = document.getElementById("ethInput").value.trim();
+    if (!val || Number(val) <= 0) { alert("Enter a valid amount"); return; }
+    const payment = ethers.parseUnits(val, 18);
+    const mocketh = new ethers.Contract(MOCKETH, ERC20_ABI, signer);
+    const approveTx = await mocketh.approve(pool, payment);
+    await approveTx.wait();
+    const buyTx = await ido.buy(payment);
+    await buyTx.wait();
+    await refreshAll();
+    alert("🎉 Purchase successful! You received " + meta.symbol + " tokens.");
+  } catch (err) {
+    console.error(err);
+    let msg = err?.reason || err?.message || "Transaction failed";
+    if (msg.includes("Below min") || msg.includes("amount too low") || msg.includes("min amount")) {
+      const minETH = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18));
+      const tierName = tier === 3 ? "Gold" : tier === 2 ? "Silver" : "Bronze";
+      msg = `Amount is below minimum for ${tierName} tier (${minETH.toFixed(4)} ETH)`;
+    }
+    if (msg.includes("Wallet cap") || msg.includes("cap exceeded")) msg = "You reached your wallet allocation limit";
+    alert("❌ " + msg);
+  }
+};
