@@ -6,11 +6,10 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   It is the moment a new player moves from curiosity to participation.
   Every line here serves the greater whole: welcoming, guiding, and empowering the first believers.
   The code is intentionally simple and consistent with all other pages so the player feels at home immediately.
-  In the clean-slate protocol, this is the first pure experience — no legacy decimals, no hidden complexity.
-  This page is the bridge between the outside world and the living honeycomb.
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
+const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";   // Updated clean-slate address
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
@@ -36,9 +35,14 @@ document.getElementById("connectBtn").onclick = async () => {
     document.getElementById("tier").innerHTML = tierNames[tier];
 
     const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
-    const balance = await honey.balanceOf(addr);
+    const honeyBalance = await honey.balanceOf(addr);
     document.getElementById("honeyBalance").innerHTML = 
-      (Number(balance) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " HONEY";
+      (Number(honeyBalance) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " HONEY";
+
+    const mockusdc = new ethers.Contract(MOCKUSDC, ERC20_ABI, signer);
+    const mockusdcBalance = await mockusdc.balanceOf(addr);
+    document.getElementById("mockusdcBalance").innerHTML = 
+      (Number(mockusdcBalance) / 1e18).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " MockUSDC";
 
     document.getElementById("walletInfo").style.display = "block";
   } catch (e) {
