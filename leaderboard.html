@@ -6,12 +6,6 @@
   <title>Honey Launchpad • Leaderboard</title>
   <script type="module" src="leaderboard.js"></script>
   <style>
-    /* 
-      The visual language of the Honey Protocol — warm, premium, and consistent across all pages.
-      This page tells the story of early believers who saw the spark and acted.
-      Every design choice serves the narrative: clarity, competition, and celebration of participation.
-      The clean-slate 18-decimal protocol is fully reflected here.
-    */
     :root { --bg: #f5f5f5; --card-bg: white; --text: #111; --accent: #4caf50; }
     [data-theme="dark"] { --bg: #0f0f0f; --card-bg: #1a1a1a; --text: #f0f0f0; --accent: #4caf50; }
     body { 
@@ -45,20 +39,26 @@
   </style>
 </head>
 <body>
-  <!-- Dark Mode Toggle - the same blue halo that appears across the entire Honey Launchpad, symbolizing continuity -->
+  <!-- Dark Mode Toggle -->
   <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
     <button id="themeToggle" class="theme-toggle">🌙</button>
   </div>
 
-  <!-- Main title - the heartbeat of the protocol made visible -->
   <h1>🏆 Honey Protocol Leaderboard</h1>
 
-  <!-- Subtitle Card - purple gradient to match the main dashboard Leaderboard card, giving it proper prominence -->
+  <!-- Subtitle Card -->
   <div class="card" style="text-align:center; font-size:1.25em; font-weight:700; color:white; background: linear-gradient(135deg, #9c27b0, #673ab7); padding:18px;">
     Top HONEY holders by balance
   </div>
 
-  <!-- Main Leaderboard Table - the living scoreboard where early belief becomes visible rank -->
+  <!-- Connect Wallet Button (shown when not connected) -->
+  <div id="connectSection" class="card" style="text-align:center; display:none;">
+    <button onclick="connectWallet()" style="background:#4caf50; color:white; padding:16px 24px; font-size:18px; width:100%;">
+      👛 Connect Wallet to See Your Position
+    </button>
+  </div>
+
+  <!-- Main Leaderboard Table -->
   <div class="card">
     <table id="leaderboardTable">
       <thead>
@@ -72,10 +72,10 @@
     </table>
   </div>
 
-  <!-- Refresh Button with perfectly balanced spacing for mobile harmony -->
+  <!-- Refresh Button with perfectly balanced spacing -->
   <button onclick="loadLeaderboard()" style="width:100%; padding:14px; margin-top:24px; margin-bottom:24px;">🔄 Refresh Leaderboard</button>
 
-  <!-- Footer Card - narrative closure, reminding players this is the beginning of something greater -->
+  <!-- Footer Card -->
   <div class="card" style="text-align:center; color:var(--text); opacity:0.75; font-size:0.95em; padding:22px;">
     Only wallets that have interacted with the protocol are shown.<br>
     The game is just beginning.
@@ -87,6 +87,11 @@
       const newTheme = current === "dark" ? "light" : "dark";
       document.documentElement.setAttribute("data-theme", newTheme);
       localStorage.setItem("theme", newTheme);
+    };
+
+    // Simple connect function to show the connect button
+    window.connectWallet = async () => {
+      window.loadLeaderboard();
     };
   </script>
 </body>

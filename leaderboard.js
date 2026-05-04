@@ -25,6 +25,8 @@ let provider;
 
 window.loadLeaderboard = async function loadLeaderboard() {
   const tbody = document.getElementById("leaderboardBody");
+  const connectSection = document.getElementById("connectSection");
+
   tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px;">Connecting wallet to see your position...</td></tr>`;
 
   try {
@@ -39,7 +41,6 @@ window.loadLeaderboard = async function loadLeaderboard() {
 
     tbody.innerHTML = "";
 
-    // Only show the currently connected wallet if they hold HONEY
     if (balance > 0) {
       const tr = document.createElement("tr");
       tr.classList.add("current-user");   // Highlight the connected player
@@ -49,10 +50,12 @@ window.loadLeaderboard = async function loadLeaderboard() {
         <td><strong>${balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
       `;
       tbody.appendChild(tr);
+      connectSection.style.display = "none";
     } else {
       tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px; color:#888;">
-        Connect your wallet and buy HONEY to appear on the Leaderboard.
+        You currently hold 0 HONEY.<br>Buy some on Spark DEX to appear on the Leaderboard.
       </td></tr>`;
+      connectSection.style.display = "block";
     }
 
   } catch (e) {
@@ -60,6 +63,7 @@ window.loadLeaderboard = async function loadLeaderboard() {
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px; color:#888;">
       Connect your wallet to see your position on the Leaderboard.
     </td></tr>`;
+    connectSection.style.display = "block";
   }
 };
 
