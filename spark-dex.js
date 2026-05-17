@@ -24,7 +24,6 @@ const HONEY = "0x8285bd7892F89b65632Ec5De8A700183DBA8cdb2";
 const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
 const SPARK_POOL = "0x8bF5100DE99950B6C0E0f1edc3CADE379243F8Eb";
 
-const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];
 const PAIR_ABI = ["function swap(uint256,uint256,address,bytes)"];
 
@@ -68,14 +67,16 @@ async function updateBalances() {
 async function loadPoolState() {
   try {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
+
     const mockusdc = new ethers.Contract(MOCKUSDC, ERC20_ABI, provider);
     const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
 
     reserveMockUSDC = Number(await mockusdc.balanceOf(SPARK_POOL)) / 1e18;
     reserveHONEY = Number(await honey.balanceOf(SPARK_POOL)) / 1e18;
-    currentLivePrice = reserveMockUSDC / reserveHONEY;
 
-    let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
+    currentLivePrice = (reserveMockUSDC > 0) ? reserveMockUSDC / reserveHONEY : 0;
+
+    let priceStr = currentLivePrice > 0 ? currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '') : "0";
     document.getElementById("honeyPriceDisplay").innerHTML = `
       Live Honey Price: <strong>${priceStr} MockUSDC</strong>
     `;
@@ -91,7 +92,7 @@ async function loadPoolState() {
     console.error("Pool state fetch failed", e);
     document.getElementById("poolState").innerHTML = `
       <span style="color:#f44336">Unable to read pool reserves.<br>
-      The pool contract may not be funded yet or there is a network issue.</span>
+      The pool may not be funded yet or there is a network issue.</span>
     `;
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>—</strong>`;
   }
