@@ -68,11 +68,11 @@ async function updateBalances() {
 async function loadPoolState() {
   try {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
-    const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
-    const [reserve0, reserve1] = await pool.getReserves();
+    const mockusdc = new ethers.Contract(MOCKUSDC, ERC20_ABI, provider);
+    const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
 
-    reserveMockUSDC = Number(reserve0) / 1e18;
-    reserveHONEY = Number(reserve1) / 1e18;
+    reserveMockUSDC = Number(await mockusdc.balanceOf(SPARK_POOL)) / 1e18;
+    reserveHONEY = Number(await honey.balanceOf(SPARK_POOL)) / 1e18;
     currentLivePrice = reserveMockUSDC / reserveHONEY;
 
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
@@ -91,7 +91,7 @@ async function loadPoolState() {
     console.error("Pool state fetch failed", e);
     document.getElementById("poolState").innerHTML = `
       <span style="color:#f44336">Unable to read pool reserves.<br>
-      Please make sure the pool is funded and try refreshing.</span>
+      The pool contract may not be funded yet or there is a network issue.</span>
     `;
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>—</strong>`;
   }
