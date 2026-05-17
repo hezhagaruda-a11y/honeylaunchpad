@@ -22,7 +22,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
-const SPARK_POOL = "0x8bF5100DE99950B6C0E0f1edc3CADE379243F8Eb"; // New deployed pool address
+const SPARK_POOL = "0x8bF5100DE99950B6C0E0f1edc3CADE379243F8Eb";
 
 const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];
