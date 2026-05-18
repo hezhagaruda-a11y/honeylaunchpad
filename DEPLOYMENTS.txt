@@ -1,41 +1,28 @@
 === AAA LAUNCHPAD v2 DEPLOYMENTS (Sepolia) ===
 Date: [21/4/2026 14.49 Helsinki]
+Updated: 18/5/2026 15.15 Helsinki
 
-Honey (protocol token): 0xe750381c8e13f2c59c3EFb7DA37af7232Da03aD2
+Honey (protocol token): 0x1364819B3367f37c77813FE149074d963F2A5021
 
-MockETH (new payment token): 0x084283482cAA832eb629a2c7674C2454A8277597
+ETH (new payment token): 0x084283482cAA832eb629a2c7674C2454A8277597
 
-MockUSDC (old payment token): 0x0dde8f47709a785CEc265779Bb75fDBC7a3d8e93
+InvestorNFT: 0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037
 
-MockCCC (sale token): 0x7f4313FF0eD138030ac68cCB8D0cbcbC5F3aFAEA
-
-MockDDD (sale token): 0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F
-
-InvestorNFT: 0x475C04Ea6428048C28dA7cd9D04Cd62b7dDd54EA
-
-New IDOFactory: 
-0x1a8344bb318c99bFe8C1e7f823F1068aE6F8aeB8
-
-New IDO Pool launched from Remix Functions - HONEY POOL: 
-0x144b16Aa20f5F3CdDBBD3a3c9a89E53854435368
+IDOFactory Address (Latest Version):
+0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0   
+*Remember to transfer/fund the new IDO pool with these new tokens 145 500 000. Needs multisig approval.
 
 
+Spark Pool (Sepolia Test - Latest) Address:  0xE479823072D2c7b1881Fa7315cd2557A8D5A7b9b
 
-
-Spark Pool (Sepolia Test) Address: 0x288728f3d24F9CC63771eB463f1D144d24C493F0
+Hive Control Panel Localhost:
+http://localhost:8000/admin.html
 
 Notes:
 
-23.4.2026 15.53 Helsinki
-Important Note for Protocol Launch (Treasury USDC)
-Total USDC Raised in Quick Stats in Hive Control Dashboard = USDC balance of the connected wallet (the treasury address you set when launching the pool).
-
-This is expected and correct behavior.
-When users buy tokens, USDC is transferred directly to the treasury address (your wallet or any address you specify).
-The pool contract itself ends up with 0 USDC after each buy.
+When users buy tokens, ETH is transferred directly to the treasury address (your wallet or any address you specify).
+The pool contract itself ends up with 0 ETH after each buy, as the ETH goes to the treasury address (multisig).
 This design is intentional for security and simplicity: funds go straight to the treasury without sitting in the pool.
 
 Make sure to document this clearly in the launch checklist:
-
-When launching a pool, the treasury address should be a secure multisig or dedicated treasury wallet on mainnet.
-Quick Stats "Total USDC Raised" reflects the treasury's current USDC balance.
+When launching a pool, the treasury address should be a secure multisig.
