@@ -7,17 +7,27 @@
   <script type="module" src="admin.js"></script>
   <style>
     :root {
+      --bg: #f5f5f5;
+      --card-bg: white;
+      --text: #111;
+      --accent: #10b981;
+      --halo: #10b981;
+    }
+    [data-theme="dark"] {
       --bg: #0a0a0a;
-      --card: #1a1a1a;
+      --card-bg: #1a1a1a;
       --text: #f0f0f0;
-      --accent: #4caf50;
+      --accent: #10b981;
+      --halo: #10b981;
     }
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       margin: 0;
       padding: 20px;
+      min-height: 100vh;
+      transition: background 0.3s;
     }
     .header {
       display: flex;
@@ -26,36 +36,57 @@
       margin-bottom: 30px;
     }
     .card {
-      background: var(--card);
+      background: var(--card-bg);
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid #ddd;
     }
-    input {
-      background: #222;
-      color: white;
-      border: 1px solid #444;
-      padding: 10px;
-      border-radius: 6px;
+    [data-theme="dark"] .card {
+      border: 1px solid #333;
+    }
+    input, textarea {
+      background: #f8f8f8;
+      color: var(--text);
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 8px;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    [data-theme="dark"] input, [data-theme="dark"] textarea {
+      background: #222;
+      border-color: #444;
     }
     button {
-      background: #4caf50;
+      background: #111;
       color: white;
       border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 14px 20px;
+      border-radius: 12px;
       cursor: pointer;
-      font-size: 15px;
-      margin-top: 10px;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 8px;
+      box-shadow: 0 0 12px var(--halo);
+      transition: all 0.2s ease;
+    }
+    [data-theme="dark"] button {
+      background: white;
+      color: #111;
+    }
+    button:hover {
+      box-shadow: 0 0 20px var(--halo);
+      transform: scale(1.02);
     }
     .refresh {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      background: #333;
+      background: #111;
       color: white;
       border-radius: 50%;
       width: 56px;
@@ -64,66 +95,158 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 0 20px #10b981;
+      z-index: 1000;
     }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+    [data-theme="dark"] .refresh {
+      background: white;
+      color: #111;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    [data-theme="dark"] th, [data-theme="dark"] td {
+      border-bottom: 1px solid #444;
+    }
+    .theme-toggle {
+      padding: 10px 12px;
+      font-size: 22px;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+      box-shadow: 0 0 12px #4fc3f7;
+    }
+    [data-theme="dark"] .theme-toggle {
+      background: white;
+      color: #111;
+      box-shadow: 0 0 12px #4fc3f7;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Dark Mode Toggle -->
+  <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+  </div>
+
   <div class="header">
     <h1>🍯 Hive Control • Honey Launchpad</h1>
-    <button id="connectBtn">Connect Wallet</button>
+    <button id="connectBtn">👑 Connect Wallet</button>
   </div>
 
-  <div id="walletInfo" class="card" style="display:none;">
-    <strong>Connected as:</strong> <span id="adminWallet"></span>
+  <!-- Unauthorized Message -->
+  <div id="unauthorizedMessage" class="card" style="display:none; background:#ffebee; color:#c62828; text-align:center;">
+    <strong>Access Denied</strong><br>
+    This wallet is not authorized for Hive Control.<br>
+    Please use an authorized wallet or ask the owner to add you.
   </div>
 
-  <div class="card">
-    <h2>Quick Stats</h2>
-    <div id="quickStats"></div>
+  <!-- Main Content -->
+  <div id="mainContent" style="display:none;">
+
+    <!-- Wallet Info -->
+    <div id="walletInfo" class="card" style="display:none;">
+      <strong>Connected as:</strong> <span id="adminWallet"></span>
+    </div>
+
+    <!-- Authorized Wallets -->
+    <div class="card">
+      <h2>🔑 Authorized Wallets</h2>
+      <p style="color:#666; margin-bottom:16px;">Only these wallets can access the Hive Control Dashboard</p>
+      <div id="authorizedList" style="margin-bottom:20px;"></div>
+      <input id="newWalletInput" placeholder="Add new wallet address (0x...)" style="margin-bottom:8px;">
+      <button onclick="addAuthorizedWallet()">Add Authorized Wallet</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="card">
+      <h2>Quick Stats</h2>
+      <div id="quickStats"></div>
+    </div>
+
+    <!-- Quick Launch New Pool -->
+    <div class="card">
+      <h2>🚀 Quick Launch New Pool</h2>
+      <p style="color:#666; margin-bottom:16px;">
+        Fill the details below. All information will be stored with the pool and shown on the IDO Launch Card.
+      </p>
+      <input id="projectName" placeholder="Project Name (e.g. EEE Launch #1)">
+      <input id="symbol" placeholder="Symbol (e.g. EEE)">
+      <input id="saleToken" placeholder="Sale Token Address" value="0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F">
+      <textarea id="description" rows="2" placeholder="Short description for IDO card"></textarea>
+      <input id="logoUrl" placeholder="Logo URL (optional)">
+      <input id="bannerUrl" placeholder="Banner URL (optional)">
+      <input id="treasury" placeholder="Treasury Address" value="">
+      <input id="startTime" type="number" placeholder="Start Time (Unix timestamp)">
+      <input id="endTime" type="number" placeholder="End Time (Unix timestamp)">
+      <input id="totalSupply" type="number" placeholder="Total Supply For Sale" value="145500000000000000000000000">
+      <button id="launchBtn">Launch New IDO Pool</button>
+    </div>
+
+    <!-- All Active Pools -->
+    <div class="card">
+      <h2>All Active Pools</h2>
+      <table id="poolsTable">
+        <thead>
+          <tr>
+            <th>Pool Name</th>
+            <th>Address</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Sold</th>
+            <th>Remaining</th>
+            <th>% Sold</th>
+            <th>ETH Raised</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- InvestorNFT Tiers & Ownership -->
+    <div class="card">
+      <h2>InvestorNFT Tiers & Ownership</h2>
+      <div id="nftStats"></div>
+    </div>
+
+    <!-- My Acquisitions -->
+    <div class="card">
+      <h2>My Acquisitions (Last 10)</h2>
+      <div id="acquisitions"></div>
+    </div>
+
+    <!-- Protocol Traffic Summary -->
+    <div class="card">
+      <h2>📡 Protocol Traffic Summary</h2>
+      <div id="trafficSummary"></div>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h2>🚀 Quick Launch New Pool</h2>
-    <input id="saleToken" placeholder="Sale Token Address" value="0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F">
-    <input id="treasury" placeholder="Treasury Address" value="">
-    <input id="startTime" type="number" placeholder="Start Time (Unix)" value="">
-    <input id="endTime" type="number" placeholder="End Time (Unix)" value="">
-    <input id="totalSupply" type="number" placeholder="Total Supply For Sale" value="145000000000000000000000000">
-    <button id="launchBtn">Launch New IDO Pool</button>
-  </div>
-
-  <div class="card">
-    <h2>All Active Pools</h2>
-    <table id="poolsTable">
-      <thead>
-        <tr>
-          <th>Pool Name</th>
-          <th>Address</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-          <th>Sold</th>
-          <th>Remaining</th>
-          <th>% Sold</th>
-          <th>USDC Raised</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2>InvestorNFT Tiers & Ownership</h2>
-    <div id="nftStats"></div>
-  </div>
-
-  <div class="card">
-    <h2>My Acquisitions</h2>
-    <div id="acquisitions"></div>
-  </div>
-
+  <!-- Floating Refresh Button -->
   <button class="refresh" id="refreshBtn">↻</button>
+
+  <script>
+    // Theme toggle
+    document.getElementById("themeToggle").onclick = () => {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const newTheme = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    };
+  </script>
+
 </body>
 </html>
