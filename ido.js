@@ -2,25 +2,25 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 /*
   ===================================================================
-  IDO LAUNCH POOL PAGE – THE LIVING HEART OF THE HONEYCOMB
+  IDO PURCHASE PAGE – THE SOVEREIGN HEXAGON
   ===================================================================
-  This page is where belief becomes action. 
-  A player connects their wallet, sees their tier, feels the live price of the sale token, 
-  and chooses to buy into the next sovereign hexagon.
-  
-  The page now dynamically reads the token name and symbol from the sale token contract itself.
-  No more manual PROJECTS map. No more legacy 6-decimal scaling. 
-  Pure 18-decimal math with MockETH as payment token.
-  
-  Every line here tells the story of the protocol’s evolution: from early MockUSDC struggles 
-  to a clean, self-replicating lattice where every new pool launches with perfect clarity.
+  This is where belief becomes tokens.
+  Every new pool launched from Hive Control appears here dynamically.
+  No static PROJECTS map. No legacy 6-decimal logic.
+  Pure 18-decimal mathematics. Tiered pricing. Self-describing pools.
 */
 
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const MOCKETH = "0x084283482cAA832eb629a2c7674C2454A8277597";
 
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
-const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function name() view returns (string)", "function symbol() view returns (string)"];
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function approve(address,uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function name() view returns (string)",
+  "function symbol() view returns (string)"
+];
 const IDO_ABI = [
   "function buy(uint256)",
   "function purchased(address) view returns (uint256)",
@@ -30,16 +30,20 @@ const IDO_ABI = [
   "function PRICE_BRONZE() view returns (uint256)",
   "function totalSold() view returns (uint256)",
   "function totalSupplyForSale() view returns (uint256)",
-  "function startTime() view returns (uint256)"
+  "function startTime() view returns (uint256)",
+  "function saleToken() view returns (address)"   // Recommended for future robustness
 ];
 
 const params = new URLSearchParams(window.location.search);
 const pool = params.get("pool");
-if (!pool) { alert("Invalid pool address"); throw new Error("Missing pool param"); }
+if (!pool) {
+  alert("Invalid pool address. Please open from the dashboard with ?pool=...");
+  throw new Error("Missing pool param");
+}
 
 document.getElementById("poolAddress").innerText = pool;
 
-let signer, user, tier = 0, ethBal = 0n, purchased = 0n, ido, startTime, meta;
+let signer, user, tier = 0, ethBal = 0n, purchased = 0n, ido, startTime, meta = { name: "IDO", symbol: "TOK" };
 
 const MIN_AMOUNT_ETH = {
   1: ethers.parseUnits("0.1", 18),
@@ -47,7 +51,7 @@ const MIN_AMOUNT_ETH = {
   3: ethers.parseUnits("1.5", 18)
 };
 
-// ====================== DARK MODE ======================
+// Theme handling
 const themeToggle = document.getElementById("themeToggle");
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
@@ -58,43 +62,59 @@ const savedTheme = localStorage.getItem("theme") || "light";
 setTheme(savedTheme);
 themeToggle.onclick = () => {
   const current = document.documentElement.getAttribute("data-theme") || "light";
-  const newTheme = current === "dark" ? "light" : "dark";
-  setTheme(newTheme);
+  setTheme(current === "dark" ? "light" : "dark");
 };
 
-// ====================== CONNECT ======================
 document.getElementById("connect").onclick = async () => {
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-  user = await signer.getAddress();
-  document.getElementById("wallet").innerText = user;
+  try {
+    if (!window.ethereum) {
+      alert("MetaMask not detected");
+      return;
+    }
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    user = await signer.getAddress();
 
-  const nft = new ethers.Contract(NFT, NFT_ABI, provider);
-  ido = new ethers.Contract(pool, IDO_ABI, signer);
+    document.getElementById("wallet").innerText = user;
 
-  tier = Number(await nft.getUserTier(user));
-  const tierNames = ["None","Bronze","Silver","Gold"];
-  document.getElementById("tier").innerText = tierNames[tier];
+    const nft = new ethers.Contract(NFT, NFT_ABI, provider);
+    ido = new ethers.Contract(pool, IDO_ABI, signer);
 
-  startTime = Number(await ido.startTime());
-  startCountdown();
+    tier = Number(await nft.getUserTier(user));
+    const tierNames = ["None", "Bronze", "Silver", "Gold"];
+    document.getElementById("tier").innerText = tierNames[tier] || "None";
 
-  await loadPoolMetadata();
-  await refreshAll();
-  setInterval(refreshAll, 8000);
+    startTime = Number(await ido.startTime());
+    startCountdown();
+
+    await loadPoolMetadata();
+    await refreshAll();
+    setInterval(refreshAll, 8000);
+  } catch (e) {
+    console.error(e);
+    alert("Connection failed. Make sure you are on Sepolia.");
+  }
 };
 
 async function loadPoolMetadata() {
-  // Dynamically fetch name and symbol from the sale token contract itself.
-  // This makes every new pool automatically beautiful and self-describing.
-  const saleToken = new ethers.Contract(pool, ERC20_ABI, signer || new ethers.JsonRpcProvider('https://rpc.sepolia.org'));
   try {
-    const name = await saleToken.name();
-    const symbol = await saleToken.symbol();
-    meta = { name: name || "IDO", symbol: symbol || "TOK" };
+    // Try reading saleToken() from pool first (future-proof)
+    let saleTokenAddr;
+    try {
+      saleTokenAddr = await ido.saleToken();
+    } catch (_) {
+      saleTokenAddr = pool; // fallback to current behavior
+    }
+
+    const saleToken = new ethers.Contract(saleTokenAddr, ERC20_ABI, signer || new ethers.JsonRpcProvider("https://rpc.sepolia.org"));
+    const name = await saleToken.name().catch(() => "IDO");
+    const symbol = await saleToken.symbol().catch(() => "TOK");
+
+    meta = { name, symbol };
   } catch (e) {
     meta = { name: "IDO", symbol: "TOK" };
   }
+
   document.getElementById("pageTitle").innerText = `🍯 Honey Launchpad • ${meta.name}`;
   document.getElementById("buySectionTitle").innerText = `Buy ${meta.symbol} Tokens`;
   document.getElementById("buyBtn").innerText = `Buy ${meta.symbol} Tokens`;
@@ -104,12 +124,15 @@ function startCountdown() {
   const container = document.getElementById("countdownContainer");
   container.style.display = "block";
   container.innerHTML = `<strong>IDO Starts in:</strong> <span id="bigCountdown" style="font-size:22px;"></span>`;
+
   const update = () => {
     const now = Math.floor(Date.now() / 1000);
     const diff = startTime - now;
     const el = document.getElementById("bigCountdown");
+    if (!el) return;
+
     if (diff <= 0) {
-      el.innerHTML = `<span style="color:#4caf50">LIVE NOW! 🚀</span>`;
+      el.innerHTML = `<span style="color:#10b981; font-weight:700">LIVE NOW! 🚀</span>`;
       return;
     }
     const d = Math.floor(diff / 86400);
@@ -118,25 +141,31 @@ function startCountdown() {
     const s = diff % 60;
     el.textContent = `${d}d ${h}h ${m}m ${s}s`;
   };
+
   update();
   setInterval(update, 1000);
 }
 
 async function refreshAll() {
+  if (!signer || !ido) return;
+
   const mocketh = new ethers.Contract(MOCKETH, ERC20_ABI, signer);
   ethBal = await mocketh.balanceOf(user);
   purchased = await ido.purchased(user);
 
-  document.getElementById("balance").innerText = Number(ethers.formatUnits(ethBal, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " ETH";
+  document.getElementById("balance").innerText =
+    Number(ethers.formatUnits(ethBal, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETH";
 
   const cap = await ido.MAX_PER_WALLET();
   const price = await getPrice();
-  const capETH = Number(ethers.formatUnits(cap * price / (10n ** 36n), 18));
-  document.getElementById("allocation").innerText = Number(ethers.formatUnits(cap, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol + " (~" + capETH.toFixed(2) + " ETH)";
+  const capETH = Number(ethers.formatUnits((cap * price) / (10n ** 36n), 18));
 
-  document.getElementById("purchaseHistory").innerHTML = `
-    You have already purchased <strong>${parseFloat(ethers.formatUnits(purchased, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> ${meta.symbol}
-  `;
+  document.getElementById("allocation").innerText =
+    Number(ethers.formatUnits(cap, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+    ` ${meta.symbol} (~${capETH.toFixed(2)} ETH)`;
+
+  document.getElementById("purchaseHistory").innerHTML =
+    `You have already purchased <strong>${parseFloat(ethers.formatUnits(purchased, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> ${meta.symbol}`;
 
   await refreshPoolState();
 }
@@ -150,11 +179,11 @@ async function refreshPoolState() {
   const percent = totalNum > 0 ? (soldNum / totalNum) * 100 : 0;
 
   const price = await getPrice();
-  const ethRaised = Number(ethers.formatUnits(sold * price / (10n ** 36n), 18));
+  const ethRaised = Number(ethers.formatUnits((sold * price) / (10n ** 36n), 18));
 
-  document.getElementById("ethRaised").innerText = ethRaised.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " ETH";
-  document.getElementById("sold").innerText = soldNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
-  document.getElementById("remaining").innerText = remainingNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  document.getElementById("ethRaised").innerText = ethRaised.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETH";
+  document.getElementById("sold").innerText = soldNum.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " " + meta.symbol;
+  document.getElementById("remaining").innerText = remainingNum.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " " + meta.symbol;
   document.getElementById("percent").innerText = percent.toFixed(2) + "% SOLD";
   document.getElementById("progressBar").style.width = percent + "%";
 }
@@ -168,16 +197,18 @@ async function getPrice() {
 async function updateQuote() {
   const val = document.getElementById("ethInput").value.trim();
   if (!val || tier === 0) {
-    document.getElementById("quote").innerText = "You receive: 0 " + meta.symbol;
+    document.getElementById("quote").innerText = `You receive: 0 ${meta.symbol}`;
     return;
   }
   const ethAmountBig = ethers.parseUnits(val, 18);
   const priceBig = await getPrice();
-  const tokensBig = (ethAmountBig * 10n ** 18n) / priceBig;
-  document.getElementById("quote").innerText = "You receive: " + parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " " + meta.symbol;
+  const tokensBig = (ethAmountBig * (10n ** 18n)) / priceBig;
+  document.getElementById("quote").innerText =
+    `You receive: ${parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${meta.symbol}`;
 }
 
 document.getElementById("ethInput").oninput = updateQuote;
+
 document.getElementById("maxBtn").onclick = async () => {
   if (tier === 0) return;
   const price = await getPrice();
@@ -188,28 +219,40 @@ document.getElementById("maxBtn").onclick = async () => {
   document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(usable, 18)).toFixed(4);
   await updateQuote();
 };
+
 document.getElementById("minBtn").onclick = () => {
   if (tier === 0) return;
   document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18)).toFixed(4);
   updateQuote();
 };
+
 document.getElementById("buyBtn").onclick = async () => {
   try {
-    if (!signer || tier === 0) { alert("You need an Investor NFT"); return; }
+    if (!signer || tier === 0) {
+      alert("You need an Investor NFT to participate");
+      return;
+    }
     const val = document.getElementById("ethInput").value.trim();
-    if (!val || Number(val) <= 0) { alert("Enter a valid amount"); return; }
+    if (!val || Number(val) <= 0) {
+      alert("Enter a valid amount");
+      return;
+    }
+
     const payment = ethers.parseUnits(val, 18);
     const mocketh = new ethers.Contract(MOCKETH, ERC20_ABI, signer);
+
     const approveTx = await mocketh.approve(pool, payment);
     await approveTx.wait();
+
     const buyTx = await ido.buy(payment);
     await buyTx.wait();
+
     await refreshAll();
-    alert("🎉 Purchase successful! You received " + meta.symbol + " tokens.");
+    alert(`🎉 Purchase successful! You received ${meta.symbol} tokens.`);
   } catch (err) {
     console.error(err);
     let msg = err?.reason || err?.message || "Transaction failed";
-    if (msg.includes("Below min") || msg.includes("amount too low") || msg.includes("min amount")) {
+    if (msg.includes("Below min") || msg.includes("amount too low")) {
       const minETH = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18));
       const tierName = tier === 3 ? "Gold" : tier === 2 ? "Silver" : "Bronze";
       msg = `Amount is below minimum for ${tierName} tier (${minETH.toFixed(4)} ETH)`;
@@ -218,3 +261,10 @@ document.getElementById("buyBtn").onclick = async () => {
     alert("❌ " + msg);
   }
 };
+
+// Auto-load pool state for display even before connect
+(async () => {
+  try {
+    await loadPoolMetadata();
+  } catch (e) {}
+})();
