@@ -6,10 +6,10 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   ===================================================================
   This page is where belief becomes action.
   A player connects their wallet, sees their tier, feels the live price of the sale token,
-  and buys into the next sovereign hexagon using **Honey** as the permanent payment token.
+  and buys into the next sovereign hexagon using Honey as the permanent payment token.
 
-  This is the final clean-slate version. Honey is now the official payment token for all IDO pools.
-  Every purchase of tokens in an IDO increases demand for Honey, which raises its price, which makes Investor NFTs more valuable,
+  The contract has no minimum commitments. The MIN button has been removed.
+  Every purchase increases demand for Honey, which raises its price, which makes Investor NFTs more valuable,
   which attracts more participants, which fuels more launches — a self-reinforcing flywheel.
 
   The Olympus 3,3 model is fused here: the IDO purchase is the stake, the 14.5% reserve is the rebase engine.
@@ -17,7 +17,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 */
 
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
-const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";   // Honey is now the permanent payment token
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";   // Honey is the permanent payment token
 
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
 const ERC20_ABI = [
@@ -50,13 +50,6 @@ document.getElementById("poolAddress").innerText = pool;
 
 let signer, user, tier = 0, honeyBal = 0n, purchased = 0n, ido, startTime, meta = { name: "IDO", symbol: "TOK" };
 
-const MIN_AMOUNT_HONEY = {
-  1: ethers.parseUnits("0.1", 18),
-  2: ethers.parseUnits("0.3", 18),
-  3: ethers.parseUnits("1.5", 18)
-};
-
-// ====================== DARK MODE ======================
 const themeToggle = document.getElementById("themeToggle");
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
@@ -225,12 +218,6 @@ document.getElementById("maxBtn").onclick = async () => {
   await updateQuote();
 };
 
-document.getElementById("minBtn").onclick = () => {
-  if (tier === 0) return;
-  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(MIN_AMOUNT_HONEY[tier], 18)).toFixed(4);
-  updateQuote();
-};
-
 document.getElementById("buyBtn").onclick = async () => {
   try {
     if (!signer || tier === 0) {
@@ -257,11 +244,6 @@ document.getElementById("buyBtn").onclick = async () => {
   } catch (err) {
     console.error(err);
     let msg = err?.reason || err?.message || "Transaction failed";
-    if (msg.includes("Below min") || msg.includes("amount too low")) {
-      const minHONEY = parseFloat(ethers.formatUnits(MIN_AMOUNT_HONEY[tier], 18));
-      const tierName = tier === 3 ? "Gold" : tier === 2 ? "Silver" : "Bronze";
-      msg = `Amount is below minimum for ${tierName} tier (${minHONEY.toFixed(4)} HONEY)`;
-    }
     if (msg.includes("Wallet cap") || msg.includes("cap exceeded")) msg = "You reached your wallet allocation limit";
     alert("❌ " + msg);
   }
