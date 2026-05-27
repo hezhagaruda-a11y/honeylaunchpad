@@ -1,6 +1,8 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-const FACTORY = "0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0";
+
+const FACTORY = "0x58aF8F88B834C11AD211475C86a76966F6306ABE";
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
+
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
 const POOL_ABI = [
@@ -9,57 +11,34 @@ const POOL_ABI = [
   "function startTime() view returns (uint256)",
   "function purchased(address) view returns (uint256)"
 ];
-const PROJECTS = {
-  "0x144b16aa20f5f3cddbbd3a3c9a89e53854435368": {
-    name: "HONEY Launch",
-    symbol: "HONEY",
-    logo: "https://picsum.photos/id/1015/40/40",
-    banner: "https://picsum.photos/id/1015/700/180"
-  },
-  "0x81eb4d4279027a8b79b017c8d0c7e7d752511a0b": {
-    name: "EEE Launch #1",
-    symbol: "EEE",
-    logo: "https://picsum.photos/id/1015/40/40",
-    banner: "https://picsum.photos/id/1015/700/180"
-  },
-  "0x0857de57bdbf43fcc3df67f9a4076beb97f1c79b": {
-    name: "DDD Launch #4",
-    symbol: "DDD",
-    logo: "https://picsum.photos/id/1005/40/40",
-    banner: "https://picsum.photos/id/1005/700/180"
-  },
-  "0xfdefcb25bbf1525c067a3033b68011efff0e63e2": {
-    name: "DDD Launch #3",
-    symbol: "DDD",
-    logo: "https://picsum.photos/id/1016/40/40",
-    banner: "https://picsum.photos/id/1016/700/180"
-  },
-  "0x1372b8dd99c74b6fbfee15dbe11affde6008e473": {
-    name: "DDD Launch #2",
-    symbol: "DDD",
-    logo: "https://picsum.photos/id/133/40/40",
-    banner: "https://picsum.photos/id/133/700/180"
-  }
-};
+
+const PROJECTS = {};
+
 const connectBtn = document.getElementById("connectBtn");
 const walletEl = document.getElementById("wallet");
 const tierEl = document.getElementById("tier");
 const poolsEl = document.getElementById("pools");
 const purchasesEl = document.getElementById("purchases");
+
 let signer, provider, userTier = 0, userAddress;
+
 const themeToggle = document.getElementById("themeToggle");
+
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem("theme", theme);
   themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
 }
+
 const savedTheme = localStorage.getItem("theme") || "light";
 setTheme(savedTheme);
+
 themeToggle.onclick = () => {
   const current = document.documentElement.getAttribute("data-theme") || "light";
   const newTheme = current === "dark" ? "light" : "dark";
   setTheme(newTheme);
 };
+
 connectBtn.onclick = async () => {
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
@@ -77,6 +56,7 @@ connectBtn.onclick = async () => {
     tierEl.innerText = "Error — check console";
   }
 };
+
 async function loadPools() {
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);
   const pools = await factory.getAllPools();
@@ -107,6 +87,7 @@ async function loadPools() {
     poolsEl.appendChild(div);
   });
 }
+
 async function loadMyAcquisitions() {
   if (!purchasesEl) return;
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);
