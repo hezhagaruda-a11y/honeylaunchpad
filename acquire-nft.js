@@ -18,7 +18,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
    No MockETH is used on this page. No legacy 6-decimal code remains.
 */
 
-const HONEY = "0x8285bd7892F89b65632Ec5De8A700183DBA8cdb2";
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const SPARK_POOL = "0x7c42daFfbA3a7103d456a0d5d076e58901bE378b";
 
@@ -88,21 +88,18 @@ async function loadLiveHoneyPrice() {
     const r0 = Number(reserve0) / 1e18;
     const r1 = Number(reserve1) / 1e18;
 
-    // Pure 18-decimal math – both MockUSDC and HONEY use 18 decimals
     let price;
 
     if (r0 > 0 && r1 > 0) {
-      // Try both possible reserve orders and choose the sensible price
       const p1 = r0 / r1;
       const p2 = r1 / r0;
-      price = Math.min(p1, p2);   // The smaller value is the price of HONEY in MockUSDC
+      price = Math.min(p1, p2);
     } else {
-      price = 0.00004; // reasonable fallback for empty or new pool
+      price = 0.00004;
     }
 
     currentLivePrice = price;
 
-    // Clean decimal display – no trailing zeros
     let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
     if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
 
