@@ -2,16 +2,22 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 /*
   ===================================================================
-  IDO PURCHASE PAGE – THE SOVEREIGN HEXAGON
+  IDO LAUNCH POOL PAGE – THE LIVING HEART OF THE HONEYCOMB
   ===================================================================
-  This is where belief becomes tokens.
-  Every new pool launched from Hive Control appears here dynamically.
-  No static PROJECTS map. No legacy 6-decimal logic.
-  Pure 18-decimal mathematics. Tiered pricing. Self-describing pools.
+  This page is where belief becomes action.
+  A player connects their wallet, sees their tier, feels the live price of the sale token,
+  and buys into the next sovereign hexagon using **Honey** as the permanent payment token.
+
+  This is the final clean-slate version. Honey is now the official payment token for all IDO pools.
+  Every purchase of tokens in an IDO increases demand for Honey, which raises its price, which makes Investor NFTs more valuable,
+  which attracts more participants, which fuels more launches — a self-reinforcing flywheel.
+
+  The Olympus 3,3 model is fused here: the IDO purchase is the stake, the 14.5% reserve is the rebase engine.
+  No legacy 6-decimal logic remains. No static mappings. Pure 18-decimal mathematics.
 */
 
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
-const MOCKETH = "0x084283482cAA832eb629a2c7674C2454A8277597";
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";   // Honey is now the permanent payment token
 
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
 const ERC20_ABI = [
@@ -30,8 +36,7 @@ const IDO_ABI = [
   "function PRICE_BRONZE() view returns (uint256)",
   "function totalSold() view returns (uint256)",
   "function totalSupplyForSale() view returns (uint256)",
-  "function startTime() view returns (uint256)",
-  "function saleToken() view returns (address)"   // Recommended for future robustness
+  "function startTime() view returns (uint256)"
 ];
 
 const params = new URLSearchParams(window.location.search);
@@ -43,15 +48,15 @@ if (!pool) {
 
 document.getElementById("poolAddress").innerText = pool;
 
-let signer, user, tier = 0, ethBal = 0n, purchased = 0n, ido, startTime, meta = { name: "IDO", symbol: "TOK" };
+let signer, user, tier = 0, honeyBal = 0n, purchased = 0n, ido, startTime, meta = { name: "IDO", symbol: "TOK" };
 
-const MIN_AMOUNT_ETH = {
+const MIN_AMOUNT_HONEY = {
   1: ethers.parseUnits("0.1", 18),
   2: ethers.parseUnits("0.3", 18),
   3: ethers.parseUnits("1.5", 18)
 };
 
-// Theme handling
+// ====================== DARK MODE ======================
 const themeToggle = document.getElementById("themeToggle");
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
@@ -62,7 +67,8 @@ const savedTheme = localStorage.getItem("theme") || "light";
 setTheme(savedTheme);
 themeToggle.onclick = () => {
   const current = document.documentElement.getAttribute("data-theme") || "light";
-  setTheme(current === "dark" ? "light" : "dark");
+  const newTheme = current === "dark" ? "light" : "dark";
+  setTheme(newTheme);
 };
 
 document.getElementById("connect").onclick = async () => {
@@ -98,12 +104,11 @@ document.getElementById("connect").onclick = async () => {
 
 async function loadPoolMetadata() {
   try {
-    // Try reading saleToken() from pool first (future-proof)
     let saleTokenAddr;
     try {
       saleTokenAddr = await ido.saleToken();
     } catch (_) {
-      saleTokenAddr = pool; // fallback to current behavior
+      saleTokenAddr = pool;
     }
 
     const saleToken = new ethers.Contract(saleTokenAddr, ERC20_ABI, signer || new ethers.JsonRpcProvider("https://rpc.sepolia.org"));
@@ -149,20 +154,20 @@ function startCountdown() {
 async function refreshAll() {
   if (!signer || !ido) return;
 
-  const mocketh = new ethers.Contract(MOCKETH, ERC20_ABI, signer);
-  ethBal = await mocketh.balanceOf(user);
+  const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
+  honeyBal = await honey.balanceOf(user);
   purchased = await ido.purchased(user);
 
   document.getElementById("balance").innerText =
-    Number(ethers.formatUnits(ethBal, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETH";
+    Number(ethers.formatUnits(honeyBal, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " HONEY";
 
   const cap = await ido.MAX_PER_WALLET();
   const price = await getPrice();
-  const capETH = Number(ethers.formatUnits((cap * price) / (10n ** 36n), 18));
+  const capHONEY = Number(ethers.formatUnits((cap * price) / (10n ** 36n), 18));
 
   document.getElementById("allocation").innerText =
     Number(ethers.formatUnits(cap, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-    ` ${meta.symbol} (~${capETH.toFixed(2)} ETH)`;
+    ` ${meta.symbol} (~${capHONEY.toFixed(2)} HONEY)`;
 
   document.getElementById("purchaseHistory").innerHTML =
     `You have already purchased <strong>${parseFloat(ethers.formatUnits(purchased, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> ${meta.symbol}`;
@@ -179,9 +184,9 @@ async function refreshPoolState() {
   const percent = totalNum > 0 ? (soldNum / totalNum) * 100 : 0;
 
   const price = await getPrice();
-  const ethRaised = Number(ethers.formatUnits((sold * price) / (10n ** 36n), 18));
+  const honeyRaised = Number(ethers.formatUnits((sold * price) / (10n ** 36n), 18));
 
-  document.getElementById("ethRaised").innerText = ethRaised.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETH";
+  document.getElementById("ethRaised").innerText = honeyRaised.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " HONEY";
   document.getElementById("sold").innerText = soldNum.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " " + meta.symbol;
   document.getElementById("remaining").innerText = remainingNum.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " " + meta.symbol;
   document.getElementById("percent").innerText = percent.toFixed(2) + "% SOLD";
@@ -200,9 +205,9 @@ async function updateQuote() {
     document.getElementById("quote").innerText = `You receive: 0 ${meta.symbol}`;
     return;
   }
-  const ethAmountBig = ethers.parseUnits(val, 18);
+  const honeyAmountBig = ethers.parseUnits(val, 18);
   const priceBig = await getPrice();
-  const tokensBig = (ethAmountBig * (10n ** 18n)) / priceBig;
+  const tokensBig = (honeyAmountBig * (10n ** 18n)) / priceBig;
   document.getElementById("quote").innerText =
     `You receive: ${parseFloat(ethers.formatUnits(tokensBig, 18)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${meta.symbol}`;
 }
@@ -215,14 +220,14 @@ document.getElementById("maxBtn").onclick = async () => {
   const cap = await ido.MAX_PER_WALLET();
   const remainingCap = cap - purchased;
   const maxFromCap = (remainingCap * price) / (10n ** 36n);
-  const usable = maxFromCap < ethBal ? maxFromCap : ethBal;
+  const usable = maxFromCap < honeyBal ? maxFromCap : honeyBal;
   document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(usable, 18)).toFixed(4);
   await updateQuote();
 };
 
 document.getElementById("minBtn").onclick = () => {
   if (tier === 0) return;
-  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18)).toFixed(4);
+  document.getElementById("ethInput").value = parseFloat(ethers.formatUnits(MIN_AMOUNT_HONEY[tier], 18)).toFixed(4);
   updateQuote();
 };
 
@@ -239,9 +244,9 @@ document.getElementById("buyBtn").onclick = async () => {
     }
 
     const payment = ethers.parseUnits(val, 18);
-    const mocketh = new ethers.Contract(MOCKETH, ERC20_ABI, signer);
+    const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
 
-    const approveTx = await mocketh.approve(pool, payment);
+    const approveTx = await honey.approve(pool, payment);
     await approveTx.wait();
 
     const buyTx = await ido.buy(payment);
@@ -253,9 +258,9 @@ document.getElementById("buyBtn").onclick = async () => {
     console.error(err);
     let msg = err?.reason || err?.message || "Transaction failed";
     if (msg.includes("Below min") || msg.includes("amount too low")) {
-      const minETH = parseFloat(ethers.formatUnits(MIN_AMOUNT_ETH[tier], 18));
+      const minHONEY = parseFloat(ethers.formatUnits(MIN_AMOUNT_HONEY[tier], 18));
       const tierName = tier === 3 ? "Gold" : tier === 2 ? "Silver" : "Bronze";
-      msg = `Amount is below minimum for ${tierName} tier (${minETH.toFixed(4)} ETH)`;
+      msg = `Amount is below minimum for ${tierName} tier (${minHONEY.toFixed(4)} HONEY)`;
     }
     if (msg.includes("Wallet cap") || msg.includes("cap exceeded")) msg = "You reached your wallet allocation limit";
     alert("❌ " + msg);
