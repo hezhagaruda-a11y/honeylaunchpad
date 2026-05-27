@@ -17,8 +17,9 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   - InvestorNFT: 0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037
   - Payment Token (HONEY): 0x1364819B3367f37c77813FE149074d963F2A5021
   
-  The dashboard now supports real image upload for logo and banner with live preview.
-  Files are stored in memory for future IPFS upload when launching the pool.
+  The dashboard now tracks HONEY Raised from each IDO pool (actual balance in the pool contract).
+  Metadata entered in the Quick Launch form is saved to localStorage keyed by the new pool address.
+  This allows the public dashboard to read the rich metadata in future updates.
 */
 
 const FACTORY = "0x58aF8F88B834C11AD211475C86a76966F6306ABE";
@@ -157,6 +158,8 @@ window.removeAuthorizedWallet = function removeAuthorizedWallet(index) {
 
 async function launchNewPool() {
   if (!signer) return alert("Connect wallet first");
+  const projectName = document.getElementById("projectName").value.trim() || "Unknown Pool";
+  const symbol = document.getElementById("symbol").value.trim() || "TOK";
   const saleToken = document.getElementById("saleToken").value;
   const treasury = document.getElementById("treasury").value;
   let start = parseInt(document.getElementById("startTime").value) || Math.floor(Date.now() / 1000) + 300;
@@ -168,7 +171,18 @@ async function launchNewPool() {
     const tx = await factory.launchIDO(saleToken, treasury, start, end, total);
     alert("Launching pool... Tx: " + tx.hash);
     await tx.wait();
-    alert(`✅ New IDO Pool launched successfully!\n\nPool Address: ${tx.to}\n\nRemember to top up the pool with ${document.getElementById("totalSupply").value} tokens for sale.`);
+
+    // Save metadata to localStorage keyed by the pool address
+    const metadata = {
+      projectName: projectName,
+      symbol: symbol,
+      description: document.getElementById("description").value.trim(),
+      logoUrl: document.getElementById("logoUrl").value.trim(),
+      bannerUrl: document.getElementById("bannerUrl").value.trim()
+    };
+    localStorage.setItem("poolMetadata_" + tx.to, JSON.stringify(metadata));
+
+    alert(`✅ New IDO Pool launched successfully!\n\nPool Address: ${tx.to}\n\nProject: ${projectName} (${symbol})\n\nRemember to top up the pool with ${total} tokens for sale.`);
     await refreshAll();
   } catch (e) {
     console.error(e);
@@ -209,28 +223,3 @@ document.getElementById("refreshBtn").onclick = refreshAll;
 
 console.log("🚀 Hive Control Dashboard loaded - Wallet gated access active");
 console.log("Authorized wallets:", authorizedWallets);
-
-// Image upload preview logic
-document.getElementById("logoFile").addEventListener("change", function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      document.getElementById("logoPreview").src = ev.target.result;
-      document.getElementById("logoPreview").style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-document.getElementById("bannerFile").addEventListener("change", function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      document.getElementById("bannerPreview").src = ev.target.result;
-      document.getElementById("bannerPreview").style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  }
-});
