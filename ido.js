@@ -8,7 +8,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   A player connects their wallet, sees their tier, feels the live price of the sale token,
   and buys into the next sovereign hexagon using Honey as the permanent payment token.
 
-  The contract has no minimum commitments. The MIN button has been removed.
+  Honey is now the official payment token for all IDO pools.
   Every purchase increases demand for Honey, which raises its price, which makes Investor NFTs more valuable,
   which attracts more participants, which fuels more launches — a self-reinforcing flywheel.
 
