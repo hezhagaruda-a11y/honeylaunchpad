@@ -122,16 +122,6 @@
       color: #111;
       box-shadow: 0 0 12px #4fc3f7;
     }
-    .preview {
-      max-width: 200px;
-      max-height: 120px;
-      margin-top: 8px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-    }
-    [data-theme="dark"] .preview {
-      border-color: #444;
-    }
   </style>
 </head>
 <body>
@@ -176,16 +166,8 @@
       <input id="symbol" placeholder="Symbol (e.g. EEE)">
       <input id="saleToken" placeholder="Sale Token Address" value="0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F">
       <textarea id="description" rows="2" placeholder="Short description for IDO card"></textarea>
-
-      <!-- Image Upload Fields -->
-      <label style="display:block; margin-top:12px; font-weight:600;">Logo Image</label>
-      <input type="file" id="logoFile" accept="image/*">
-      <img id="logoPreview" class="preview" style="display:none;">
-
-      <label style="display:block; margin-top:12px; font-weight:600;">Banner Image</label>
-      <input type="file" id="bannerFile" accept="image/*">
-      <img id="bannerPreview" class="preview" style="display:none;">
-
+      <input id="logoUrl" placeholder="Logo URL (optional)">
+      <input id="bannerUrl" placeholder="Banner URL (optional)">
       <input id="treasury" placeholder="Treasury Address" value="">
       <input id="startTime" type="number" placeholder="Start Time (Unix)" value="">
       <input id="endTime" type="number" placeholder="End Time (Unix)" value="">
