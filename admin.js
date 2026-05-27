@@ -18,7 +18,7 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   shows the real new pool address + a clear top-up reminder.
 */
 
-const FACTORY = "0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0";
+const FACTORY = "0x58aF8F88B834C11AD211475C86a76966F6306ABE";
 const NFT     = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const ETH     = "0x084283482cAA832eb629a2c7674C2454A8277597";   // MockETH – official payment token
 
