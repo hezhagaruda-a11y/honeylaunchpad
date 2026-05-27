@@ -13,14 +13,15 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   the keys to the entire lattice.
   
   Updated contract addresses (clean slate, May 2026):
-  - IDOFactory: 0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0
+  - IDOFactory: 0x58aF8F88B834C11AD211475C86a76966F6306ABE
   - InvestorNFT: 0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037
   - Payment Token (HONEY): 0x1364819B3367f37c77813FE149074d963F2A5021
   
-  Important tokenomics rule: All HONEY paid for Investor NFT minting goes directly to the treasury wallet. No burn.
+  The dashboard now supports real image upload for logo and banner with live preview.
+  Files are stored in memory for future IPFS upload when launching the pool.
 */
 
-const FACTORY = "0x7Df7c9253A88d2C2dBaBB1dA18BF234aa0D111B0";
+const FACTORY = "0x58aF8F88B834C11AD211475C86a76966F6306ABE";
 const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 
@@ -167,7 +168,7 @@ async function launchNewPool() {
     const tx = await factory.launchIDO(saleToken, treasury, start, end, total);
     alert("Launching pool... Tx: " + tx.hash);
     await tx.wait();
-    alert(`✅ New IDO Pool launched successfully!\n\nPool Address: ${tx.to}\n\nRemember to top up the pool with ${document.getElementById("totalSupply").value} tokens for sale.\n\nNote: All HONEY paid for NFT minting goes directly to the treasury wallet.`);
+    alert(`✅ New IDO Pool launched successfully!\n\nPool Address: ${tx.to}\n\nRemember to top up the pool with ${document.getElementById("totalSupply").value} tokens for sale.`);
     await refreshAll();
   } catch (e) {
     console.error(e);
@@ -202,32 +203,34 @@ async function refreshAll() {
   }
 }
 
-// File upload handlers for logo and banner
-document.getElementById("logoFile").onchange = function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    document.getElementById("logoPreview").src = ev.target.result;
-    document.getElementById("logoPreview").style.display = "block";
-  };
-  reader.readAsDataURL(file);
-};
-
-document.getElementById("bannerFile").onchange = function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    document.getElementById("bannerPreview").src = ev.target.result;
-    document.getElementById("bannerPreview").style.display = "block";
-  };
-  reader.readAsDataURL(file);
-};
-
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("launchBtn").onclick = launchNewPool;
 document.getElementById("refreshBtn").onclick = refreshAll;
 
 console.log("🚀 Hive Control Dashboard loaded - Wallet gated access active");
 console.log("Authorized wallets:", authorizedWallets);
+
+// Image upload preview logic
+document.getElementById("logoFile").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById("logoPreview").src = ev.target.result;
+      document.getElementById("logoPreview").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+document.getElementById("bannerFile").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById("bannerPreview").src = ev.target.result;
+      document.getElementById("bannerPreview").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+});
