@@ -20,9 +20,9 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   New Spark DEX pool deployed: 0xE479823072D2c7b1881Fa7315cd2557A8D5A7b9b
 */
 
-const HONEY = "0x8285bd7892F89b65632Ec5De8A700183DBA8cdb2";
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
 const MOCKUSDC = "0x9544B69170Da4c1916140d955972Bfd53848E106";
-const SPARK_POOL = "0xE479823072D2c7b1881Fa7315cd2557A8D5A7b9b"; // New deployed pool address
+const SPARK_POOL = "0xE479823072D2c7b1881Fa7315cd2557A8D5A7b9b";
 
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)", "function approve(address,uint256)", "function allowance(address,address) view returns (uint256)"];
 const PAIR_ABI = ["function swap(uint256,uint256,address,bytes)"];
