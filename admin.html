@@ -46,7 +46,7 @@
     [data-theme="dark"] .card {
       border: 1px solid #333;
     }
-    input, textarea {
+    input, textarea, input[type="file"] {
       background: #f8f8f8;
       color: var(--text);
       border: 1px solid #ddd;
@@ -56,7 +56,7 @@
       margin-bottom: 12px;
       font-size: 15px;
     }
-    [data-theme="dark"] input, [data-theme="dark"] textarea {
+    [data-theme="dark"] input, [data-theme="dark"] textarea, [data-theme="dark"] input[type="file"] {
       background: #222;
       border-color: #444;
     }
@@ -122,6 +122,13 @@
       color: #111;
       box-shadow: 0 0 12px #4fc3f7;
     }
+    .image-preview {
+      max-width: 120px;
+      max-height: 120px;
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 2px solid var(--halo);
+    }
   </style>
 </head>
 <body>
@@ -161,13 +168,23 @@
 
     <div class="card">
       <h2>🚀 Quick Launch New Pool</h2>
-      <p style="color:#666; margin-bottom:16px;">Fill the details below. All information will be stored with the pool and shown on the IDO Launch Card on the main dashboard.</p>
+      <p style="color:#666; margin-bottom:16px;">All HONEY paid for NFT minting goes directly to the treasury wallet (no burn). Fill the details below. All information will be stored with the pool and shown on the IDO Launch Card on the main dashboard.</p>
+      
       <input id="projectName" placeholder="Project Name (e.g. EEE Launch #1)">
       <input id="symbol" placeholder="Symbol (e.g. EEE)">
       <input id="saleToken" placeholder="Sale Token Address" value="0xaC5F8F5Bd883C76782BB56E832dDB44a089dBa3F">
       <textarea id="description" rows="2" placeholder="Short description for IDO card"></textarea>
-      <input id="logoUrl" placeholder="Logo URL (optional)">
-      <input id="bannerUrl" placeholder="Banner URL (optional)">
+      
+      <!-- Logo Upload -->
+      <label>Logo Image</label>
+      <input id="logoFile" type="file" accept="image/*">
+      <img id="logoPreview" class="image-preview" style="display:none;" alt="Logo Preview">
+
+      <!-- Banner Upload -->
+      <label>Banner Image</label>
+      <input id="bannerFile" type="file" accept="image/*">
+      <img id="bannerPreview" class="image-preview" style="display:none;" alt="Banner Preview">
+
       <input id="treasury" placeholder="Treasury Address" value="">
       <input id="startTime" type="number" placeholder="Start Time (Unix)" value="">
       <input id="endTime" type="number" placeholder="End Time (Unix)" value="">
