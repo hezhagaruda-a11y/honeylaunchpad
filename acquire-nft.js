@@ -5,14 +5,14 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
    ACQUIRE INVESTOR NFT – THE THRESHOLD PAGE (Fully Synced Version)
    ===================================================================
 
-   Updated to work perfectly with the new production-ready InvestorNFT contract.
-   - Now uses getRequiredHoneyForTier() from the contract (single source of truth)
-   - Fixed async price loading (the straw that was causing 0.00 HONEY)
-   - Tier preview images added to HTML
+   Fully updated to match the new InvestorNFT contract.
+   - Live Honey Price now displays correctly in the top card
+   - Tier amounts remain dynamic from the contract (single source of truth)
+   - Tier preview images are shown on the page
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
-const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";   // ← Your new deployed address
+const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";   // Your new deployed address
 
 const ERC20_ABI = [
   "function approve(address,uint256)",
@@ -80,16 +80,29 @@ async function loadLiveHoneyPrice() {
   try {
     const nft = new ethers.Contract(NFT, NFT_ABI, provider || new ethers.BrowserProvider(window.ethereum));
 
+    // Show loading state
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>Fetching from contract...</strong>`;
 
+    // Fetch price for Bronze tier to derive live HONEY price
+    const honeyNeededBronze = await nft.getRequiredHoneyForTier(1);
+    const usdPerBronze = 300;
+    const liveHoneyPrice = usdPerBronze / (Number(honeyNeededBronze) / 1e18);
+
+    const priceStr = liveHoneyPrice.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
+
+    document.getElementById("honeyPriceDisplay").innerHTML = `
+      Live Honey Price: <strong>${priceStr} USDC</strong> (Live Spark DEX Pool)
+    `;
+
+    // Update tier amounts (already working, but kept for completeness)
     for (const tier of [1,2,3]) {
       const honeyNeeded = await nft.getRequiredHoneyForTier(tier);
       const formatted = (Number(honeyNeeded) / 1e18).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      
       const id = tier === 1 ? "bronzeHONEY" : tier === 2 ? "silverHONEY" : "goldHONEY";
+      const usdAmount = tier === 1 ? 300 : tier === 2 ? 1000 : 5000;
       document.getElementById(id).innerHTML = `
         Requires <strong>${formatted} HONEY</strong><br>
-        <span style="font-size:0.95em; opacity:0.8; color:#4caf50;">(${tier === 1 ? 300 : tier === 2 ? 1000 : 5000} USDC equivalent)</span>
+        <span style="font-size:0.95em; opacity:0.8; color:#4caf50;">(${usdAmount} USDC equivalent)</span>
       `;
     }
   } catch (e) {
