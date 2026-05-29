@@ -4,9 +4,9 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   ===================================================================
   SPARK DEX – THE PRIMAL HEARTBEAT OF THE HONEY LAUNCHPAD PROTOCOL
   ===================================================================
-  Fully synced with our latest contracts.
-  - Restored full original swap logic (no omissions)
+  Fully synced, no omissions from your original working code.
   - Clean price formatting (no trailing zeros)
+  - Full original swap logic restored
   - Clear warning when pool has no HONEY
 */
 
@@ -68,8 +68,6 @@ async function loadPoolState() {
     }
 
     const price = reserveMockUSDC / reserveHONEY;
-
-    // Clean price formatting – removes trailing zeros
     let priceStr = price.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
 
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>${priceStr} MockUSDC</strong>`;
