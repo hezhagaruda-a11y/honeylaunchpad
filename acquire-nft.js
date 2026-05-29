@@ -5,33 +5,35 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
    ACQUIRE INVESTOR NFT – THE THRESHOLD PAGE (Clean Slate Version)
    ===================================================================
 
-   This is the heart of the Honey Launchpad protocol.
-
-   Here, a player connects their wallet, sees the live Honey price from the Spark DEX, 
-   chooses their tier, and mints their Investor NFT.
-
-   This single action is the moment they step from observer to participant in the honeycomb lattice.
-   It is the spark that ignites generational wealth mechanics.
-
-   All addresses are now the final approved Clean Slate State (May 03, 2026).
-   Pure 18-decimal math everywhere – MockUSDC (18 decimals) and HONEY (18 decimals).
-   No MockETH is used on this page. No legacy 6-decimal code remains.
+   Updated to sync with the new production-ready InvestorNFT contract.
+   Now uses getRequiredHoneyForTier() from the contract for live dynamic pricing.
+   All previous functionality (history, UI, status, etc.) is preserved.
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
-const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
-const SPARK_POOL = "0x7c42daFfbA3a7103d456a0d5d076e58901bE378b";
+
+// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+// UPDATE THIS TO YOUR NEW DEPLOYED INVESTOR NFT ADDRESS
+const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";
+// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 
 const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
 
-const POOL_ABI = ["function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"];
-const ERC20_ABI = ["function approve(address,uint256)", "function balanceOf(address) view returns (uint256)", "function allowance(address,address) view returns (uint256)"];
-const NFT_ABI = ["function mintBronze()", "function mintSilver()", "function mintGold()", "function getUserTier(address) view returns (uint256)"];
+const ERC20_ABI = [
+  "function approve(address,uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)"
+];
+
+const NFT_ABI = [
+  "function mintBronze()",
+  "function mintSilver()",
+  "function mintGold()",
+  "function getUserTier(address) view returns (uint256)",
+  "function getRequiredHoneyForTier(uint256 tier) view returns (uint256)"   // ← NEW from our contract
+];
 
 let signer, provider;
-let currentLivePrice = null;
-
-// History of acquisitions (historical + new mints in this session)
 let acquisitionsHistory = [];
 
 async function connectWallet() {
@@ -81,36 +83,18 @@ async function updateHoneyBalance() {
 
 async function loadLiveHoneyPrice() {
   try {
-    if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
-    const pool = new ethers.Contract(SPARK_POOL, POOL_ABI, provider);
-    const [reserve0, reserve1] = await pool.getReserves();
-
-    const r0 = Number(reserve0) / 1e18;
-    const r1 = Number(reserve1) / 1e18;
-
-    let price;
-
-    if (r0 > 0 && r1 > 0) {
-      const p1 = r0 / r1;
-      const p2 = r1 / r0;
-      price = Math.min(p1, p2);
-    } else {
-      price = 0.00004;
-    }
-
-    currentLivePrice = price;
-
-    let priceStr = currentLivePrice.toFixed(8).replace(/0+$/, '');
-    if (priceStr.endsWith('.')) priceStr = priceStr.slice(0, -1);
+    const nft = new ethers.Contract(NFT, NFT_ABI, provider || new ethers.BrowserProvider(window.ethereum));
 
     document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>${priceStr} USDC</strong> (Simulated Spark DEX Pool)
+      Live Honey Price: <strong>Fetching from contract...</strong>
     `;
 
-    Object.keys(TIER_USD).forEach(tier => {
-      const honeyNeeded = TIER_USD[tier] / currentLivePrice;
-      const id = tier === "1" ? "bronzeHONEY" : tier === "2" ? "silverHONEY" : "goldHONEY";
-      const formatted = honeyNeeded.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    Object.keys(TIER_USD).forEach(async (tierKey) => {
+      const tier = Number(tierKey);
+      const honeyNeeded = await nft.getRequiredHoneyForTier(tier);
+      const formatted = (Number(honeyNeeded) / 1e18).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      const id = tier === 1 ? "bronzeHONEY" : tier === 2 ? "silverHONEY" : "goldHONEY";
       document.getElementById(id).innerHTML = `
         Requires <strong>${formatted} HONEY</strong><br>
         <span style="font-size:0.95em; opacity:0.8; color:#4caf50;">(${TIER_USD[tier]} USDC equivalent)</span>
@@ -118,7 +102,7 @@ async function loadLiveHoneyPrice() {
     });
   } catch (e) {
     console.error("Live price fetch failed", e);
-    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>0.00004 USDC</strong> (Simulated Spark DEX Pool)`;
+    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>Error loading</strong>`;
   }
 }
 
@@ -129,26 +113,22 @@ window.mintTier = async (tier) => {
     alert("Please connect wallet first");
     return;
   }
-  if (!currentLivePrice) {
-    alert("Live price not loaded yet. Please refresh the page.");
-    return;
-  }
 
-  const honeyNeeded = TIER_USD[tier] / currentLivePrice;
-  const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
   const nft = new ethers.Contract(NFT, NFT_ABI, signer);
+  const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
 
   try {
+    const honeyNeeded = await nft.getRequiredHoneyForTier(tier);   // ← Now uses contract (exact amount)
     const balance = await honey.balanceOf(await signer.getAddress());
     const allowance = await honey.allowance(await signer.getAddress(), NFT);
 
-    if (balance < ethers.parseUnits(honeyNeeded.toString(), 18)) {
+    if (balance < honeyNeeded) {
       alert(`Not enough HONEY in wallet.`);
       return;
     }
 
-    if (allowance < ethers.parseUnits(honeyNeeded.toString(), 18)) {
-      const approveTx = await honey.approve(NFT, ethers.parseUnits(honeyNeeded.toString(), 18));
+    if (allowance < honeyNeeded) {
+      const approveTx = await honey.approve(NFT, honeyNeeded);
       await approveTx.wait();
     }
 
@@ -166,7 +146,7 @@ window.mintTier = async (tier) => {
     acquisitionsHistory.unshift({
       time: timeStr,
       tier: tierName,
-      honeyPaid: honeyNeeded.toFixed(2)
+      honeyPaid: (Number(honeyNeeded) / 1e18).toFixed(2)
     });
 
     if (acquisitionsHistory.length > 10) acquisitionsHistory.pop();
@@ -194,7 +174,7 @@ window.mintTier = async (tier) => {
     console.error("Mint error:", e);
     let msg = "Mint failed. ";
     if (e.reason) msg += e.reason;
-    else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: tier already minted, insufficient allowance, or contract restriction).";
+    else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: insufficient funds, tier already minted, or contract restriction).";
     else msg += e.message || "Unknown error";
     document.getElementById("status").innerHTML = `<span style="color:red">❌ ${msg}</span>`;
   }
