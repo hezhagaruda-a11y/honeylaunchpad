@@ -2,22 +2,17 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 /* 
    ===================================================================
-   ACQUIRE INVESTOR NFT – THE THRESHOLD PAGE (Clean Slate Version)
+   ACQUIRE INVESTOR NFT – THE THRESHOLD PAGE (Fully Synced Version)
    ===================================================================
 
-   Updated to sync with the new production-ready InvestorNFT contract.
-   Now uses getRequiredHoneyForTier() from the contract for live dynamic pricing.
-   All previous functionality (history, UI, status, etc.) is preserved.
+   Updated to work perfectly with the new production-ready InvestorNFT contract.
+   - Now uses getRequiredHoneyForTier() from the contract (single source of truth)
+   - Fixed async price loading (the straw that was causing 0.00 HONEY)
+   - Tier preview images added to HTML
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
-
-// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-// UPDATE THIS TO YOUR NEW DEPLOYED INVESTOR NFT ADDRESS
-const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";
-// ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
-
-const TIER_USD = { 1: 300, 2: 1000, 3: 5000 };
+const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";   // ← Your new deployed address
 
 const ERC20_ABI = [
   "function approve(address,uint256)",
@@ -30,7 +25,7 @@ const NFT_ABI = [
   "function mintSilver()",
   "function mintGold()",
   "function getUserTier(address) view returns (uint256)",
-  "function getRequiredHoneyForTier(uint256 tier) view returns (uint256)"   // ← NEW from our contract
+  "function getRequiredHoneyForTier(uint256 tier) view returns (uint256)"
 ];
 
 let signer, provider;
@@ -85,21 +80,18 @@ async function loadLiveHoneyPrice() {
   try {
     const nft = new ethers.Contract(NFT, NFT_ABI, provider || new ethers.BrowserProvider(window.ethereum));
 
-    document.getElementById("honeyPriceDisplay").innerHTML = `
-      Live Honey Price: <strong>Fetching from contract...</strong>
-    `;
+    document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>Fetching from contract...</strong>`;
 
-    Object.keys(TIER_USD).forEach(async (tierKey) => {
-      const tier = Number(tierKey);
+    for (const tier of [1,2,3]) {
       const honeyNeeded = await nft.getRequiredHoneyForTier(tier);
       const formatted = (Number(honeyNeeded) / 1e18).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       
       const id = tier === 1 ? "bronzeHONEY" : tier === 2 ? "silverHONEY" : "goldHONEY";
       document.getElementById(id).innerHTML = `
         Requires <strong>${formatted} HONEY</strong><br>
-        <span style="font-size:0.95em; opacity:0.8; color:#4caf50;">(${TIER_USD[tier]} USDC equivalent)</span>
+        <span style="font-size:0.95em; opacity:0.8; color:#4caf50;">(${tier === 1 ? 300 : tier === 2 ? 1000 : 5000} USDC equivalent)</span>
       `;
-    });
+    }
   } catch (e) {
     console.error("Live price fetch failed", e);
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>Error loading</strong>`;
@@ -118,7 +110,7 @@ window.mintTier = async (tier) => {
   const honey = new ethers.Contract(HONEY, ERC20_ABI, signer);
 
   try {
-    const honeyNeeded = await nft.getRequiredHoneyForTier(tier);   // ← Now uses contract (exact amount)
+    const honeyNeeded = await nft.getRequiredHoneyForTier(tier);
     const balance = await honey.balanceOf(await signer.getAddress());
     const allowance = await honey.allowance(await signer.getAddress(), NFT);
 
@@ -174,7 +166,7 @@ window.mintTier = async (tier) => {
     console.error("Mint error:", e);
     let msg = "Mint failed. ";
     if (e.reason) msg += e.reason;
-    else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction (possible reasons: insufficient funds, tier already minted, or contract restriction).";
+    else if (e.message.includes("CALL_EXCEPTION")) msg += "The contract rejected the transaction.";
     else msg += e.message || "Unknown error";
     document.getElementById("status").innerHTML = `<span style="color:red">❌ ${msg}</span>`;
   }
