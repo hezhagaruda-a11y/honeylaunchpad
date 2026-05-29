@@ -4,7 +4,10 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
   ===================================================================
   SPARK DEX – THE PRIMAL HEARTBEAT OF THE HONEY LAUNCHPAD PROTOCOL
   ===================================================================
-  Updated with clean price formatting (no trailing zeros).
+  Fully synced with our latest contracts.
+  - Restored full original swap logic (no omissions)
+  - Clean price formatting (no trailing zeros)
+  - Clear warning when pool has no HONEY
 */
 
 const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
@@ -21,7 +24,7 @@ let reserveHONEY = 0;
 async function connectWallet() {
   try {
     if (!window.ethereum) {
-      alert("MetaMask not detected.");
+      alert("MetaMask not detected.\n\nBest experience: Open this page inside the MetaMask mobile browser.");
       return;
     }
     provider = new ethers.BrowserProvider(window.ethereum);
@@ -32,7 +35,7 @@ async function connectWallet() {
     await loadPoolState();
   } catch (e) {
     console.error(e);
-    alert("Wallet connection failed.");
+    alert("Wallet connection failed.\n\nMake sure you are on Sepolia network and try again.");
   }
 }
 
@@ -59,14 +62,14 @@ async function loadPoolState() {
     reserveHONEY = Number(await honey.balanceOf(SPARK_POOL)) / 1e18;
 
     if (reserveHONEY === 0) {
-      document.getElementById("poolState").innerHTML = `<span style="color:#f44336">⚠️ Pool has 0 HONEY liquidity.<br>Please send HONEY to the pool address.</span>`;
-      document.getElementById("honeyPriceDisplay").innerHTML = `<span style="color:#f44336">Live Honey Price: Not available</span>`;
+      document.getElementById("poolState").innerHTML = `<span style="color:#f44336">⚠️ Pool has 0 HONEY liquidity.<br>Please send 7,500,000 HONEY to the pool address.</span>`;
+      document.getElementById("honeyPriceDisplay").innerHTML = `<span style="color:#f44336">Live Honey Price: Not available (pool empty)</span>`;
       return;
     }
 
     const price = reserveMockUSDC / reserveHONEY;
 
-    // Clean price formatting – removes trailing zeros (the fix you asked for)
+    // Clean price formatting – removes trailing zeros
     let priceStr = price.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
 
     document.getElementById("honeyPriceDisplay").innerHTML = `Live Honey Price: <strong>${priceStr} MockUSDC</strong>`;
@@ -77,7 +80,7 @@ async function loadPoolState() {
     `;
     updateQuote();
   } catch (e) {
-    console.error(e);
+    console.error("Pool state fetch failed", e);
     document.getElementById("poolState").innerHTML = `<span style="color:#f44336">Unable to read pool reserves.</span>`;
   }
 }
@@ -95,11 +98,14 @@ function updateQuote() {
 }
 
 window.performSwap = async () => {
-  // Your original swap logic (unchanged)
   const input = document.getElementById('swapAmount');
   const mockusdcAmount = parseFloat(input.value) || 0;
   if (mockusdcAmount <= 0) {
     alert("Please enter a valid amount");
+    return;
+  }
+  if (reserveHONEY === 0) {
+    alert("Pool has no HONEY liquidity. Please fund the pool first.");
     return;
   }
   if (!signer) {
