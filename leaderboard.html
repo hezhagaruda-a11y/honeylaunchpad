@@ -30,24 +30,49 @@
     .wallet { font-family: monospace; font-size: 15px; }
     .current-user { background: #fff7e6 !important; }
     [data-theme="dark"] .current-user { background: #3a2a00 !important; }
+    
+    /* Theme toggle with Honey Logo - matching Index page */
     .theme-toggle {
-      padding: 10px 12px; font-size: 22px; border-radius: 50%; width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      background: #111; color: white; box-shadow: 0 0 12px #4fc3f7;
+      padding: 8px;
+      border-radius: 50%;
+      width: 62px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: white;
+      box-shadow: 0 0 12px #4fc3f7;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    [data-theme="dark"] .theme-toggle { background: white; color: #111; box-shadow: 0 0 12px #4fc3f7; }
+    [data-theme="dark"] .theme-toggle {
+      background: white;
+      box-shadow: 0 0 12px #4fc3f7;
+    }
+    .theme-toggle img {
+      width: 55px;
+      height: 55px;
+      object-fit: contain;
+    }
   </style>
 </head>
 <body>
-  <!-- Dark Mode Toggle -->
+  <!-- Dark Mode Toggle with Honey Logo -->
   <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
-    <button id="themeToggle" class="theme-toggle">🌙</button>
+    <button id="themeToggle" class="theme-toggle">
+      <img src="honey-logo.png" alt="Honey Protocol">
+    </button>
   </div>
-  <h1>🏆 Honey Protocol Leaderboard</h1>
+
+  <h1>🏆 Leaderboard</h1>
+  
   <!-- Subtitle Card -->
   <div class="card" style="text-align:center; font-size:1.25em; font-weight:700; color:white; background: linear-gradient(135deg, #9c27b0, #673ab7); padding:18px;">
     Top HONEY holders by balance
   </div>
+  
   <!-- Main Leaderboard Table -->
   <div class="card">
     <table id="leaderboardTable">
@@ -61,13 +86,16 @@
       <tbody id="leaderboardBody"></tbody>
     </table>
   </div>
-  <!-- Refresh Button with perfectly balanced spacing -->
+  
+  <!-- Refresh Button -->
   <button onclick="loadLeaderboard()" style="width:100%; padding:14px; margin-top:24px; margin-bottom:24px;">🔄 Refresh Leaderboard</button>
+  
   <!-- Footer Card -->
   <div class="card" style="text-align:center; color:var(--text); opacity:0.75; font-size:0.95em; padding:22px;">
     Only wallets that have interacted with the protocol are shown.<br>
     The game is just beginning.
   </div>
+
   <script>
     document.getElementById("themeToggle").onclick = () => {
       const current = document.documentElement.getAttribute("data-theme") || "light";
