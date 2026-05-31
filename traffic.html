@@ -18,27 +18,27 @@
       --text: #f0f0f0;
       --accent: #4caf50;
     }
-    body { 
-      font-family: Arial; 
+    body {
+      font-family: Arial;
       background: var(--bg);
-      background-image: 
+      background-image:
         linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
         linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
         linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
         linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
       background-size: 58px 33px;
-      color: var(--text); 
-      padding: 20px; 
+      color: var(--text);
+      padding: 20px;
       margin: 0;
       min-height: 100vh;
       transition: background 0.3s;
     }
-    .card { 
-      background: var(--card-bg); 
-      padding: 20px; 
-      margin-bottom: 20px; 
-      border-radius: 12px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
     [data-theme="dark"] .card {
       border: 1px solid #333;
@@ -47,6 +47,7 @@
       font-size: 1.1em;
       margin-bottom: 12px;
       font-weight: 600;
+      color: var(--accent);
     }
     table {
       width: 100%;
@@ -86,9 +87,8 @@
   <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
     <button id="themeToggle" class="theme-toggle">🌙</button>
   </div>
-
   <h1>📡 Protocol Traffic</h1>
-
+  
   <!-- Spark DEX Recent Swaps -->
   <div class="card">
     <div class="section-title">🔥 Spark DEX • Recent Swaps</div>
@@ -103,10 +103,10 @@
       <tbody id="dexBody"></tbody>
     </table>
   </div>
-
+  
   <!-- IDO Launches & Purchases -->
   <div class="card">
-    <div class="section-title">🚀 IDO Launches &amp; Purchases</div>
+    <div class="section-title">🚀 IDO Launches & Purchases</div>
     <table id="idoTable">
       <thead>
         <tr>
@@ -118,7 +118,7 @@
       <tbody id="idoBody"></tbody>
     </table>
   </div>
-
+  
   <button onclick="loadTraffic()" style="width:100%; padding:14px; margin-top:10px;">🔄 Refresh Traffic</button>
 
   <script>
