@@ -1,17 +1,14 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
-
 /*
   ===================================================================
-  HONEY LAUNCHPAD – MAIN FRONT PAGE (Reverted + Synced)
+  HONEY LAUNCHPAD – MAIN FRONT PAGE (Final Clean Version)
   ===================================================================
-  Reverted to your exact previous GitHub version with only the requested changes:
-  - New IDOFactory address
-  - Investor Tier display preserved
+  - Removed "Honey Protocol" text
+  - Theme toggle now uses official honey-logo.png (no moon/sun emoji)
 */
 
-const FACTORY = "0xC54734432183aE0A2AD8d4Db4775148e8714F0d4";   // ← Your latest IDOFactory
+const FACTORY = "0xC54734432183aE0A2AD8d4Db4775148e8714F0d4";
 const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";
-
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
 const POOL_ABI = [
@@ -20,7 +17,6 @@ const POOL_ABI = [
   "function startTime() view returns (uint256)",
   "function purchased(address) view returns (uint256)"
 ];
-
 const PROJECTS = {};
 
 const connectBtn = document.getElementById("connectBtn");
@@ -36,7 +32,6 @@ const themeToggle = document.getElementById("themeToggle");
 function setTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem("theme", theme);
-  themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
 }
 
 const savedTheme = localStorage.getItem("theme") || "light";
@@ -54,14 +49,11 @@ connectBtn.onclick = async () => {
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
     walletEl.innerText = userAddress;
-
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
     userTier = Number(await nft.getUserTier(userAddress));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     tierEl.innerText = tiers[userTier];
-
     document.getElementById("walletInfo").style.display = "block";
-
     await loadPools();
     await loadMyAcquisitions();
   } catch (err) {
