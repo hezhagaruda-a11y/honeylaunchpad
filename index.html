@@ -3,29 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Honey Launchpad</title>
+  <title>Honey Launchpad • The Honeycomb Awakens</title>
   <script type="module" src="index.js"></script>
   <style>
     :root {
       --bg: #f5f5f5;
       --card-bg: white;
       --text: #111;
-      --accent: #4caf50;
+      --accent: #ffc107;
+      --gold: #ffeb3b;
     }
     [data-theme="dark"] {
       --bg: #0f0f0f;
       --card-bg: #1a1a1a;
       --text: #f0f0f0;
-      --accent: #4caf50;
+      --accent: #ffc107;
     }
     body {
       font-family: Arial;
       background: var(--bg);
       background-image:
-        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(60deg, rgba(255,193,7,0.09) 25%, transparent 25%),
-        linear-gradient(120deg, rgba(255,193,7,0.09) 25%, transparent 25%);
+        linear-gradient(60deg, rgba(255,193,7,0.12) 25%, transparent 25%),
+        linear-gradient(120deg, rgba(255,193,7,0.12) 25%, transparent 25%),
+        linear-gradient(60deg, rgba(255,193,7,0.12) 25%, transparent 25%),
+        linear-gradient(120deg, rgba(255,193,7,0.12) 25%, transparent 25%);
       background-size: 58px 33px;
       color: var(--text);
       margin: 0;
@@ -33,18 +34,41 @@
       min-height: 100vh;
       transition: background 0.3s;
     }
+    h1 {
+      text-align: center;
+      font-size: 2.8em;
+      margin: 20px 0 30px;
+      background: linear-gradient(90deg, #ffc107, #ffeb3b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #ffeb3b, #ffc107);
+      color: #111;
+      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+    }
     .card {
       background: var(--card-bg);
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      padding: 24px;
+      margin-bottom: 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
     }
     [data-theme="dark"] .card {
       border: 1px solid #333;
     }
     button {
-      padding: 18px 20px;
+      padding: 18px 24px;
       border: none;
       border-radius: 12px;
       cursor: pointer;
@@ -55,84 +79,84 @@
     .action-card {
       background: linear-gradient(135deg, #ffeb3b, #ffc107);
       color: #111;
-      padding: 18px 20px;
-      border-radius: 16px;
+      padding: 24px;
+      border-radius: 20px;
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       cursor: pointer;
       transition: transform 0.2s ease;
-      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
     }
     .action-card:hover {
-      transform: scale(1.03);
+      transform: scale(1.04);
     }
     .theme-toggle {
       padding: 10px 12px;
-      font-size: 22px;
+      font-size: 24px;
       border-radius: 50%;
-      width: 44px;
-      height: 44px;
+      width: 52px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: #111;
       color: white;
-      box-shadow: 0 0 12px #4fc3f7;
+      box-shadow: 0 0 15px #4fc3f7;
     }
     [data-theme="dark"] .theme-toggle {
       background: white;
       color: #111;
-      box-shadow: 0 0 12px #4fc3f7;
+      box-shadow: 0 0 15px #4fc3f7;
     }
   </style>
 </head>
 <body>
   <!-- Dark Mode Toggle -->
-  <div style="position: fixed; top: 15px; right: 15px; z-index: 100;">
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
     <button id="themeToggle" class="theme-toggle">🌙</button>
   </div>
-  <h1>🍯 Honey Protocol</h1>
 
-  <!-- 1. Leaderboard (First card) -->
-  <div onclick="window.location.href='leaderboard.html'" class="action-card" style="background: linear-gradient(135deg, #9c27b0, #673ab7); color: white;">
-    <h2 style="margin:0; font-size:22px;">🏆 Leaderboard</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Top HONEY holders</p>
+  <div class="hero">
+    <h1>🍯 Honey Launchpad</h1>
+    <p style="font-size:1.3em; margin:0;">The Honeycomb is alive.<br>Step in. Build generational wealth.</p>
   </div>
 
-  <!-- 2. Player Onboarding (Second card) -->
+  <!-- Action Cards -->
+  <div onclick="window.location.href='leaderboard.html'" class="action-card">
+    <h2 style="margin:0; font-size:26px;">🏆 Leaderboard</h2>
+    <p style="margin:8px 0 0 0; font-size:15px; opacity:0.9;">Top HONEY holders &amp; visionaries</p>
+  </div>
+
   <div onclick="window.location.href='onboarding.html'" class="action-card" style="background: linear-gradient(135deg, #00a86b, #00c17a); color: white;">
-    <h2 style="margin:0; font-size:22px;">🌟 Player Onboarding</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Welcome • First steps • Get started</p>
+    <h2 style="margin:0; font-size:26px;">🌟 Player Onboarding</h2>
+    <p style="margin:8px 0 0 0; font-size:15px; opacity:0.9;">Welcome • First steps • Get started</p>
   </div>
 
-  <!-- 3. Spark DEX -->
   <div onclick="window.location.href='spark-dex.html'" class="action-card" style="background: linear-gradient(135deg, #ff9800, #f57c00);">
-    <h2 style="margin:0; font-size:22px;">🔥 Spark DEX • Buy HONEY</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Real swaps • Live price discovery</p>
+    <h2 style="margin:0; font-size:26px;">🔥 Spark DEX • Buy HONEY</h2>
+    <p style="margin:8px 0 0 0; font-size:15px; opacity:0.9;">Real swaps • Live price discovery</p>
   </div>
 
-  <!-- 4. Protocol Traffic -->
   <div onclick="window.location.href='traffic.html'" class="action-card" style="background: linear-gradient(135deg, #00bcd4, #009688); color: white;">
-    <h2 style="margin:0; font-size:22px;">📡 Protocol Traffic</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Live DEX &amp; IDO activity • Open to all</p>
+    <h2 style="margin:0; font-size:26px;">📡 Protocol Traffic</h2>
+    <p style="margin:8px 0 0 0; font-size:15px; opacity:0.9;">Live DEX &amp; IDO activity • Open to all</p>
   </div>
 
-  <!-- 5. Acquire Investor NFT -->
   <div onclick="window.location.href='acquire-nft.html'" class="action-card">
-    <h2 style="margin:0; font-size:22px;">🗝️ Acquire Investor NFT</h2>
-    <p style="margin:6px 0 0 0; font-size:14px; opacity:0.9;">Mint Bronze / Silver / Gold tiers</p>
+    <h2 style="margin:0; font-size:26px;">🗝️ Acquire Investor NFT</h2>
+    <p style="margin:8px 0 0 0; font-size:15px; opacity:0.9;">Mint Bronze / Silver / Gold tiers</p>
   </div>
 
-  <!-- 6. Connect Treasury -->
+  <!-- Treasury / Wallet Section -->
   <div class="card">
-    <button id="connectBtn" style="background: #111; color: white; box-shadow: 0 0 20px #00c853, 0 0 30px #00e676;">
-      👑 Connect Treasury
+    <button id="connectBtn" style="background: linear-gradient(135deg, #111, #222); color: white; box-shadow: 0 0 25px #00e676;">
+      👑 Connect Treasury / Wallet
     </button>
   </div>
 
   <div id="walletInfo" class="card" style="display:none;">
     <strong>Connected as:</strong> <span id="wallet"></span>
-    <br><strong>Investor Tier:</strong> <span id="tier"></span>
+    <br><strong>Investor Tier:</strong> <span id="tier" style="color:#ffc107; font-weight:bold;"></span>
   </div>
 
   <div id="pools"></div>
