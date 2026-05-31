@@ -1,69 +1,66 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 /*
-  The Leaderboard is the visible heartbeat of the Honey Protocol.
-  It transforms abstract early participation into concrete rank and recognition.
-  
-  This file powers the living scoreboard where early believers can see their place in the story.
-  
-  It connects directly to:
-  - Main Dashboard (first card)
-  - Spark DEX (accumulation mechanism)
-  - Acquire Investor NFT (the key to meaningful participation)
-  - Protocol Traffic (the live activity that feeds the ranks)
-  
-  The clean-slate 18-decimal protocol is fully integrated here.
-  Only the currently connected wallet is shown dynamically — no hardcoded lists, no demo wallets, no known wallets.
-  The player sees their own position in real time.
-  
-  Updated with the clean-slate HONEY address: 0x1364819B3367f37c77813FE149074d963F2A5021
+  ===================================================================
+  HONEY PROTOCOL – GLOBAL LEADERBOARD (Live On-Chain Version)
+  ===================================================================
+  Fully live — powered by The Graph indexing.
 */
 
-const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";   // Clean Slate HONEY Token
-const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
+const HONEY = "0x1364819B3367f37c77813FE149074d963F2A5021";
+const SUBGRAPH_URL = "https://api.studio.thegraph.com/query/1754385/honey-protocol-sepolia/v0.0.1";
+
 let provider;
 
 window.loadLeaderboard = async function loadLeaderboard() {
   const tbody = document.getElementById("leaderboardBody");
-  tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px;">Connecting wallet to see your position...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px;">Loading global leaderboard...</td></tr>`;
 
   try {
     if (!provider) provider = new ethers.BrowserProvider(window.ethereum);
-
     const signer = await provider.getSigner();
     const currentWallet = await signer.getAddress();
 
-    const honey = new ethers.Contract(HONEY, ERC20_ABI, provider);
-    const honeyBalance = await honey.balanceOf(currentWallet).catch(() => 0);
-    const balance = Number(honeyBalance) / 1e18;
+    const query = `
+      query {
+        holderBalances(orderBy: balance, orderDirection: desc, first: 100) {
+          id
+          balance
+        }
+      }
+    `;
+
+    const response = await fetch(SUBGRAPH_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query })
+    });
+
+    const data = await response.json();
+    const holders = data.data.holderBalances || [];
 
     tbody.innerHTML = "";
 
-    // Only show the currently connected wallet if they hold HONEY
-    if (balance > 0) {
+    holders.forEach((holder, index) => {
       const tr = document.createElement("tr");
-      tr.classList.add("current-user");   // Highlight the connected player
+      const isCurrent = holder.id.toLowerCase() === currentWallet.toLowerCase();
+      if (isCurrent) tr.classList.add("current-user");
       tr.innerHTML = `
-        <td class="rank">1</td>
-        <td><span class="wallet">${currentWallet.substring(0,8)}...${currentWallet.substring(36)}</span></td>
-        <td><strong>${balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+        <td class="rank">${index + 1}</td>
+        <td><span class="wallet">${holder.id.substring(0,8)}...${holder.id.substring(36)}</span></td>
+        <td><strong>${(Number(holder.balance) / 1e18).toLocaleString('en-US')}</strong></td>
       `;
       tbody.appendChild(tr);
-    } else {
-      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px; color:#888;">
-        You currently hold 0 HONEY.<br>Buy some on Spark DEX to appear on the Leaderboard.
-      </td></tr>`;
-    }
-
+    });
   } catch (e) {
     console.error("Leaderboard error:", e);
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:60px; color:#888;">
-      Connect your wallet to see your position on the Leaderboard.
+      Connect your wallet to see your position on the global leaderboard.
     </td></tr>`;
   }
 };
 
-// Initial load — the story begins when the page opens
+// Initial load
 document.addEventListener('DOMContentLoaded', () => {
   window.loadLeaderboard();
 });
