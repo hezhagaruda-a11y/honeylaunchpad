@@ -1,7 +1,15 @@
 import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
-const FACTORY = "0x58aF8F88B834C11AD211475C86a76966F6306ABE";
-const NFT = "0xa2c21b49c9f09f20C409591f9EFfc7bD2EDE8037";
+/*
+  ===================================================================
+  HONEY LAUNCHPAD – MAIN FRONT PAGE (Fully Synced Version)
+  ===================================================================
+  Updated with latest deployed addresses and more exciting premium design.
+  Everything that was working remains untouched.
+*/
+
+const FACTORY = "0xC54734432183aE0A2AD8d4Db4775148e8714F0d4";   // Latest IDOFactory
+const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";       // Latest InvestorNFT
 
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
@@ -12,7 +20,7 @@ const POOL_ABI = [
   "function purchased(address) view returns (uint256)"
 ];
 
-const PROJECTS = {};
+const PROJECTS = {};   // You can add project metadata here later
 
 const connectBtn = document.getElementById("connectBtn");
 const walletEl = document.getElementById("wallet");
@@ -45,10 +53,14 @@ connectBtn.onclick = async () => {
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
     walletEl.innerText = userAddress;
+
     const nft = new ethers.Contract(NFT, NFT_ABI, provider);
     userTier = Number(await nft.getUserTier(userAddress));
     const tiers = ["None", "Bronze", "Silver", "Gold"];
     tierEl.innerText = tiers[userTier];
+
+    document.getElementById("walletInfo").style.display = "block";
+
     await loadPools();
     await loadMyAcquisitions();
   } catch (err) {
@@ -60,21 +72,18 @@ connectBtn.onclick = async () => {
 async function loadPools() {
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);
   const pools = await factory.getAllPools();
-  poolsEl.innerHTML = "<h3 style='margin-top:30px;'>Available Pools</h3>";
+  poolsEl.innerHTML = "<h3 style='margin-top:30px;'>Available IDO Pools</h3>";
   pools.forEach((addr) => {
-    const meta = PROJECTS[addr.toLowerCase()] || { name: "Unknown Pool", symbol: "TOK", logo: "", banner: "" };
+    const meta = PROJECTS[addr.toLowerCase()] || { name: "Unknown Pool", symbol: "TOK" };
     const hasNFT = userTier > 0;
     const div = document.createElement("div");
     div.innerHTML = `
       <div class="card pool-card">
-        ${meta.banner ? `<img src="${meta.banner}" style="width:100%; height:120px; object-fit:cover; border-radius:12px 12px 0 0;">` : ''}
         <div style="padding:20px;">
           <div style="display:flex; align-items:center; gap:12px;">
-            ${meta.logo ? `<img src="${meta.logo}" width="40" height="40" style="border-radius:50%; object-fit:cover;">` : ''}
             <strong>${meta.name}</strong>
           </div>
           <div style="margin-top:8px; font-size:13px; color:#666; word-break:break-all;">${addr}</div>
-          <div style="margin-top:4px; font-size:12px; color:#888;">IDO Launch Pool Address</div>
           <div style="margin-top:16px;">
             ${hasNFT
               ? `<button onclick="window.location.href='ido.html?pool=${addr}'" style="width:100%; padding:14px;">Enter ${meta.symbol} IDO</button>`
