@@ -2,14 +2,15 @@ import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm";
 
 /*
   ===================================================================
-  HONEY LAUNCHPAD – MAIN FRONT PAGE (Fully Synced Version)
+  HONEY LAUNCHPAD – MAIN FRONT PAGE (Reverted + Synced)
   ===================================================================
-  Updated with latest deployed addresses and more exciting premium design.
-  Everything that was working remains untouched.
+  Reverted to your exact previous GitHub version with only the requested changes:
+  - New IDOFactory address
+  - Investor Tier display preserved
 */
 
-const FACTORY = "0xC54734432183aE0A2AD8d4Db4775148e8714F0d4";   // Latest IDOFactory
-const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";       // Latest InvestorNFT
+const FACTORY = "0xC54734432183aE0A2AD8d4Db4775148e8714F0d4";   // ← Your latest IDOFactory
+const NFT = "0xd46aC0ae6A040C06234Bcd35A4fd33096759fD48";
 
 const FACTORY_ABI = ["function getAllPools() view returns (address[])"];
 const NFT_ABI = ["function getUserTier(address) view returns (uint256)"];
@@ -20,7 +21,7 @@ const POOL_ABI = [
   "function purchased(address) view returns (uint256)"
 ];
 
-const PROJECTS = {};   // You can add project metadata here later
+const PROJECTS = {};
 
 const connectBtn = document.getElementById("connectBtn");
 const walletEl = document.getElementById("wallet");
@@ -72,7 +73,7 @@ connectBtn.onclick = async () => {
 async function loadPools() {
   const factory = new ethers.Contract(FACTORY, FACTORY_ABI, provider);
   const pools = await factory.getAllPools();
-  poolsEl.innerHTML = "<h3 style='margin-top:30px;'>Available IDO Pools</h3>";
+  poolsEl.innerHTML = "<h3 style='margin-top:30px;'>Available Pools</h3>";
   pools.forEach((addr) => {
     const meta = PROJECTS[addr.toLowerCase()] || { name: "Unknown Pool", symbol: "TOK" };
     const hasNFT = userTier > 0;
@@ -84,6 +85,7 @@ async function loadPools() {
             <strong>${meta.name}</strong>
           </div>
           <div style="margin-top:8px; font-size:13px; color:#666; word-break:break-all;">${addr}</div>
+          <div style="margin-top:4px; font-size:12px; color:#888;">IDO Launch Pool Address</div>
           <div style="margin-top:16px;">
             ${hasNFT
               ? `<button onclick="window.location.href='ido.html?pool=${addr}'" style="width:100%; padding:14px;">Enter ${meta.symbol} IDO</button>`
